@@ -1,8 +1,10 @@
 package com.example.tensoroid.viewmodel
 
+import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.tensoroid.App
 import com.example.tensoroid.data.model.ResultItem
 import com.example.tensoroid.util.ImageSegmentationModelExecutor
 import com.example.tensoroid.util.ImageUtils
@@ -37,6 +39,10 @@ class TensoroidViewModel : ViewModel() {
 
             _resultItem.postValue(result)
         }
+    }
+
+    fun onClick() {
+        Toast.makeText(App.instance.context(), "Floating Click", Toast.LENGTH_SHORT).show()
     }
 
 }

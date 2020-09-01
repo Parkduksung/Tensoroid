@@ -11,9 +11,10 @@ abstract class BaseActivity<B : ViewDataBinding>(@LayoutRes private val layoutId
     AppCompatActivity() {
     protected lateinit var binding: B
 
-    override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
-        super.onCreate(savedInstanceState, persistentState)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, layoutId)
         binding.lifecycleOwner = this
     }
+
 }
