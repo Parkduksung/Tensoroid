@@ -29,7 +29,6 @@ class App : Application() {
         }
     }
 
-
     companion object {
         lateinit var instance: App
             private set
