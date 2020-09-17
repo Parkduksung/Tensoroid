@@ -6,7 +6,7 @@
 
         <variable
             name="VM"
-            type="com.example.tensoroid.viewmodel.TensoroidViewModel" />
+            type="com.example.tensoroid.presenter.viewmodel.TensoroidViewModel" />
 
     </data>
 
@@ -14,10 +14,10 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <androidx.camera.view.PreviewView
-            android:id="@+id/view_finder"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+        <!--        <androidx.camera.view.PreviewView-->
+        <!--            android:id="@+id/view_finder"-->
+        <!--            android:layout_width="match_parent"-->
+        <!--            android:layout_height="match_parent" />-->
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fb_capture"
@@ -33,6 +33,11 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias=".9"
             app:srcCompat="@android:drawable/ic_menu_camera" />
+
+        <ImageView
+            android:id="@+id/iv"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
