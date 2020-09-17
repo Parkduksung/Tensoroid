@@ -7,14 +7,16 @@ import com.example.tensoroid.domain.usecase.GetImage
 
 class TensoroidViewModel(private val getImage: GetImage) : ViewModel() {
 
+    private val _bitmapTransform = MutableLiveData<Bitmap>()
+    val bitmapTransform
+        get() = _bitmapTransform
 
-    private val _imageBitmap = MutableLiveData<Bitmap>()
-    val imageBitmap
-        get() = _imageBitmap
+
+    val bitmapNormal = getImage.invoke()
 
 
     fun onClick() {
-        _imageBitmap.value = getImage.invoke()
+        _bitmapTransform.value = getImage.invoke()
     }
 
 }

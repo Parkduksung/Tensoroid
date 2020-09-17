@@ -14,10 +14,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <!--        <androidx.camera.view.PreviewView-->
-        <!--            android:id="@+id/view_finder"-->
-        <!--            android:layout_width="match_parent"-->
-        <!--            android:layout_height="match_parent" />-->
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fb_capture"
@@ -35,9 +31,24 @@
             app:srcCompat="@android:drawable/ic_menu_camera" />
 
         <ImageView
-            android:id="@+id/iv"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:id="@+id/iv_normal"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHeight_percent=".5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:setBitmap="@{VM.bitmapNormal}" />
+
+        <ImageView
+            android:id="@+id/iv_transform"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHeight_percent=".5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/iv_normal"
+            app:setBitmap="@{VM.bitmapTransform}" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
