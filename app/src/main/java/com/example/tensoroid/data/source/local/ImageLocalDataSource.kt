@@ -1,25 +1,25 @@
 package com.example.tensoroid.data.source.local
 
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import com.example.tensoroid.App
+import com.example.domain.domain.entity.ImageFile
 
 
 class ImageLocalDataSource {
 
+    fun getImage(): ImageFile =
+            ImageFile("image.png")
 
-    fun getImage(): Bitmap {
-
-        val assetManager = App.instance.context().assets
-
-        val inputStream = assetManager.open("image.jpg")
-
-        return BitmapFactory.decodeStream(inputStream)
-    }
+//
+//
+//        val assetManager = App.instance.context().assets
+//
+//        val inputStream = assetManager.open("image.png")
+//
+//        return BitmapFactory.decodeStream(inputStream)
+//    }
 
 
     companion object {
         fun getInstance() =
-            ImageLocalDataSource()
+                ImageLocalDataSource()
     }
 }

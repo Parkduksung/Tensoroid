@@ -6,5 +6,5 @@ import androidx.databinding.BindingAdapter
 
 @BindingAdapter("setBitmap")
 fun ImageView.setBitmap(bitmap: Bitmap?) {
-    setImageBitmap(bitmap?.rotate(-90f))
+    setImageBitmap(bitmap?.rotate(0f))
 }
