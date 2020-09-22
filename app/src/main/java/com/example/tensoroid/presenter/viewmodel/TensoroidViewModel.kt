@@ -8,7 +8,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.tensoroid.App
-import com.example.domain.domain.usecase.GetImage
+import com.example.tensoroid.domain.usecase.GetImage
 import com.example.tensoroid.util.ImageUtils.bitmapToByteBuffer
 import com.example.tensoroid.util.ImageUtils.maskImage
 import org.tensorflow.lite.Interpreter
@@ -46,13 +46,11 @@ class TensoroidViewModel(private val getImage: GetImage) : ViewModel() {
 
 
     fun onClick() {
-
         transformSegmentation(_bitmapNormal.value)
-//        _bitmapTransform.value = getImage.invoke()
     }
 
 
-    fun transformSegmentation(bitmap: Bitmap?) {
+    private fun transformSegmentation(bitmap: Bitmap?) {
         bitmap?.let { getBitmap ->
 
 
@@ -73,7 +71,8 @@ class TensoroidViewModel(private val getImage: GetImage) : ViewModel() {
             //4를 곱하는 이유는 of coordinate values * 4 bytes per float
             // 즉 float 형으로 하기위해 4를 곱하는 거였음.
             val segmentationMasks =
-                    ByteBuffer.allocateDirect(IMAGE_SIZE * IMAGE_SIZE * NUM_CLASSES * 4)
+                    ByteBuffer.allocateDirect(IMAGE_SIZE * IMAGE_SIZE * NUM_CLASSES * TO_FLOAT)
+
             //요거를 해야 마스킹한게 보이네.
             segmentationMasks.order(ByteOrder.nativeOrder())
 
@@ -87,7 +86,6 @@ class TensoroidViewModel(private val getImage: GetImage) : ViewModel() {
             interpreter.run(contentArray, segmentationMasks)
 
             _bitmapTransform.value = maskImage(getBitmap, convertBytebufferMaskToBitmap(segmentationMasks))
-//                convertBytebufferMaskToBitmap(segmentationMasks)
         }
     }
 
@@ -104,6 +102,7 @@ class TensoroidViewModel(private val getImage: GetImage) : ViewModel() {
 
         //지금 이게 가로세로 257 x 257 에 픽셀 돌릴려는 거 같아보임.
         // 나한태 필요한건 0 : 배경, 15 : 사람 이니까 다른거 다 없앰.
+
         for (y in 0 until IMAGE_SIZE) {
             for (x in 0 until IMAGE_SIZE) {
 

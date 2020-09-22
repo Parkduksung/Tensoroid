@@ -17,6 +17,5 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
         binding.run {
             vm = movieViewModel
         }
-
     }
 }
