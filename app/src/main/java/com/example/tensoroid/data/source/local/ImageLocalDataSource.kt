@@ -6,7 +6,7 @@ import com.example.tensoroid.domain.entity.ImageFile
 class ImageLocalDataSource {
 
     fun getImage(): ImageFile =
-            ImageFile("image.png")
+            ImageFile("not_resize2.jpeg")
 
 
     companion object {
