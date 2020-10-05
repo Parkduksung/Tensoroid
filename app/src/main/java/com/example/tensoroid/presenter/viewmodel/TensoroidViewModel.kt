@@ -73,6 +73,7 @@ class TensoroidViewModel(private val getImage: GetImage) : ViewModel() {
             val segmentationMasks =
                 ByteBuffer.allocateDirect(IMAGE_SIZE * IMAGE_SIZE * NUM_CLASSES * TO_FLOAT)
 
+
             //요거를 해야 마스킹한게 보이네.
             segmentationMasks.order(ByteOrder.nativeOrder())
 
