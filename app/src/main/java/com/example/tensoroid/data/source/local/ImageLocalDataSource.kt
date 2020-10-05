@@ -17,6 +17,15 @@ class ImageLocalDataSource {
 //        return BitmapFactory.decodeStream(inputStream)
 //    }
 
+//
+//
+//        val assetManager = App.instance.context().assets
+//
+//        val inputStream = assetManager.open("image.png")
+//
+//        return BitmapFactory.decodeStream(inputStream)
+//    }
+
 
     companion object {
         fun getInstance() =
