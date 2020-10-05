@@ -8,11 +8,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.tensoroid.App
-import com.example.tensoroid.domain.usecase.GetImage
+import com.example.domain.domain.usecase.GetImage
 import com.example.tensoroid.util.ImageUtils.bitmapToByteBuffer
 import com.example.tensoroid.util.ImageUtils.maskImage
 import org.tensorflow.lite.Interpreter
-import org.tensorflow.lite.gpu.GpuDelegate
 import java.io.FileInputStream
 import java.io.IOException
 import java.nio.ByteBuffer
@@ -47,68 +46,56 @@ class TensoroidViewModel(private val getImage: GetImage) : ViewModel() {
 
 
     fun onClick() {
+
         transformSegmentation(_bitmapNormal.value)
+//        _bitmapTransform.value = getImage.invoke()
     }
 
 
-    private fun transformSegmentation(bitmap: Bitmap?) {
+    fun transformSegmentation(bitmap: Bitmap?) {
         bitmap?.let { getBitmap ->
-            val start = System.currentTimeMillis()
+
 
             //요거 쓰나 안쓰나 똑같다.
-            val tfliteOptions = Interpreter.Options()
-
-            tfliteOptions.setNumThreads(4)
+//            val tfliteOptions = Interpreter.Options()
 //
 //            val gpuDelegate = GpuDelegate()
 //
 //            tfliteOptions.addDelegate(gpuDelegate)
 
-            val resizeBitmap = Bitmap.createScaledBitmap(bitmap, IMAGE_SIZE, IMAGE_SIZE, true)
-            Log.d("결과1", (System.currentTimeMillis() - start).toString())
-
+            val contentArray =
+                    bitmapToByteBuffer(
+                            getBitmap,
+                            IMAGE_SIZE,
+                            IMAGE_SIZE
+                    )
 
             //4를 곱하는 이유는 of coordinate values * 4 bytes per float
             // 즉 float 형으로 하기위해 4를 곱하는 거였음.
             val segmentationMasks =
-                ByteBuffer.allocateDirect(IMAGE_SIZE * IMAGE_SIZE * NUM_CLASSES * TO_FLOAT)
-
-
+                    ByteBuffer.allocateDirect(IMAGE_SIZE * IMAGE_SIZE * NUM_CLASSES * 4)
             //요거를 해야 마스킹한게 보이네.
             segmentationMasks.order(ByteOrder.nativeOrder())
 
-            Log.d("결과2", (System.currentTimeMillis() - start).toString())
             val interpreter =
-                Interpreter(
-                    loadModelFile(),
-                    tfliteOptions
-                )
+                    Interpreter(
+                            loadModelFile(),
+                            null
+                    )
 
-            Log.d("결과3", (System.currentTimeMillis() - start).toString())
-            interpreter.run(
-                bitmapToByteBuffer(resizeBitmap, IMAGE_SIZE, IMAGE_SIZE),
-                segmentationMasks
-            )
 
-            Log.d("결과4", (System.currentTimeMillis() - start).toString())
+            interpreter.run(contentArray, segmentationMasks)
 
-            val resizeResultBitmap = Bitmap.createScaledBitmap(
-                convertBytebufferMaskToBitmap(segmentationMasks),
-                getBitmap.width,
-                getBitmap.height,
-                true
-            )
-
-            _bitmapTransform.value = maskImage(getBitmap, resizeResultBitmap)
-            Log.d("결과5", (System.currentTimeMillis() - start).toString())
+            _bitmapTransform.value = maskImage(getBitmap, convertBytebufferMaskToBitmap(segmentationMasks))
+//                convertBytebufferMaskToBitmap(segmentationMasks)
         }
     }
 
     private fun convertBytebufferMaskToBitmap(
-        inputBuffer: ByteBuffer
+            inputBuffer: ByteBuffer
     ): Bitmap {
 
-//        val start = System.currentTimeMillis()
+        val start = System.currentTimeMillis()
 
         val maskBitmap = Bitmap.createBitmap(IMAGE_SIZE, IMAGE_SIZE, Bitmap.Config.ARGB_8888)
 
@@ -117,7 +104,6 @@ class TensoroidViewModel(private val getImage: GetImage) : ViewModel() {
 
         //지금 이게 가로세로 257 x 257 에 픽셀 돌릴려는 거 같아보임.
         // 나한태 필요한건 0 : 배경, 15 : 사람 이니까 다른거 다 없앰.
-
         for (y in 0 until IMAGE_SIZE) {
             for (x in 0 until IMAGE_SIZE) {
 
@@ -125,11 +111,11 @@ class TensoroidViewModel(private val getImage: GetImage) : ViewModel() {
 
                 // 배경
                 var backgroundVal = inputBuffer
-                    .getFloat((((y * IMAGE_SIZE) + x) * NUM_CLASSES) * TO_FLOAT)
+                        .getFloat((((y * IMAGE_SIZE) + x) * NUM_CLASSES) * TO_FLOAT)
 
                 // 사람
                 val personVal = inputBuffer
-                    .getFloat((((y * IMAGE_SIZE) + x) * NUM_CLASSES + NUM_PERSON) * TO_FLOAT)
+                        .getFloat((((y * IMAGE_SIZE) + x) * NUM_CLASSES + NUM_PERSON) * TO_FLOAT)
 
                 // 사람이크면 흰색으로 그림.
                 if (personVal > backgroundVal) {
@@ -141,7 +127,7 @@ class TensoroidViewModel(private val getImage: GetImage) : ViewModel() {
             }
         }
 
-//        Log.d("결과", (System.currentTimeMillis() - start).toString())
+        Log.d("결과", (System.currentTimeMillis() - start).toString())
 
         return maskBitmap
     }
