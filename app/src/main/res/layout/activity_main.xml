@@ -30,25 +30,30 @@
             app:layout_constraintVertical_bias=".9"
             app:srcCompat="@android:drawable/ic_menu_camera" />
 
-        <ImageView
-            android:id="@+id/iv_normal"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHeight_percent=".5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:setBitmap="@{VM.bitmapNormal}" />
+        <androidx.camera.view.PreviewView
+            android:id="@+id/viewFinder"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
-        <ImageView
-            android:id="@+id/iv_transform"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHeight_percent=".5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/iv_normal"
-            app:setBitmap="@{VM.bitmapTransform}" />
+        <!--        <ImageView-->
+        <!--            android:id="@+id/iv_normal"-->
+        <!--            android:layout_width="0dp"-->
+        <!--            android:layout_height="0dp"-->
+        <!--            app:layout_constraintEnd_toEndOf="parent"-->
+        <!--            app:layout_constraintHeight_percent=".5"-->
+        <!--            app:layout_constraintStart_toStartOf="parent"-->
+        <!--            app:layout_constraintTop_toTopOf="parent"-->
+        <!--            app:setBitmap="@{VM.bitmapNormal}" />-->
+
+        <!--        <ImageView-->
+        <!--            android:id="@+id/iv_transform"-->
+        <!--            android:layout_width="0dp"-->
+        <!--            android:layout_height="0dp"-->
+        <!--            app:layout_constraintEnd_toEndOf="parent"-->
+        <!--            app:layout_constraintHeight_percent=".5"-->
+        <!--            app:layout_constraintStart_toStartOf="parent"-->
+        <!--            app:layout_constraintTop_toBottomOf="@id/iv_normal"-->
+        <!--            app:setBitmap="@{VM.bitmapTransform}" />-->
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
