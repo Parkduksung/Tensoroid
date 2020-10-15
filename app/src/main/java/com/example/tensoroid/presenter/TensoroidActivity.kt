@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.widget.Toast
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
@@ -14,10 +15,13 @@ import com.example.tensoroid.base.BaseActivity
 import com.example.tensoroid.databinding.ActivityMainBinding
 import com.example.tensoroid.presenter.viewmodel.TensoroidViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import java.util.concurrent.Executors
+
 
 class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
 
     private val movieViewModel by viewModel<TensoroidViewModel>()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,22 +39,39 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
         }
     }
 
+
     private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
 
-        cameraProviderFuture.addListener(Runnable {
-            // Used to bind the lifecycle of cameras to the lifecycle owner
-            val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
+        cameraProviderFuture.addListener(
+            Runnable {
+                val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
 
-            // Preview
-            val preview = Preview.Builder()
-                .build()
-                .also {
-                    it.setSurfaceProvider(binding.viewFinder.createSurfaceProvider())
-                }
+                val cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
 
-            // Select back camera as a default
-            val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+                val preview = Preview.Builder()
+                    .build().also {
+                        it.setSurfaceProvider(binding.viewFinder.createSurfaceProvider())
+                    }
+
+
+                val imageAnalysis = ImageAnalysis.Builder()
+                    .setImageQueueDepth(ImageAnalysis.STRATEGY_BLOCK_PRODUCER)
+                    .build()
+
+                imageAnalysis.setAnalyzer(
+                    Executors.newSingleThreadExecutor(),
+                    ImageAnalysis.Analyzer { image ->
+//                        val planeProxy = image.planes[0]
+//                        val buffer: ByteBuffer = planeProxy.buffer
+//                        val bytes = ByteArray(buffer.remaining())
+//                        buffer.get(bytes)
+//                        val convert = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                        runOnUiThread {
+                            movieViewModel.transformSegmentation(binding.viewFinder.bitmap)
+                            image.close()
+                        }
+                    })
 
             try {
                 // Unbind use cases before rebinding
@@ -58,7 +79,7 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
 
                 // Bind use cases to camera
                 cameraProvider.bindToLifecycle(
-                    this, cameraSelector, preview
+                    this, cameraSelector, imageAnalysis,preview
                 )
 
             } catch (exc: Exception) {

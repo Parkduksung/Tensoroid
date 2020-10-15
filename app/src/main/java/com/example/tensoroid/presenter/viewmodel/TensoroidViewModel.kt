@@ -12,7 +12,6 @@ import com.example.tensoroid.domain.usecase.GetImage
 import com.example.tensoroid.util.ImageUtils.bitmapToByteBuffer
 import com.example.tensoroid.util.ImageUtils.maskImage
 import org.tensorflow.lite.Interpreter
-import org.tensorflow.lite.gpu.GpuDelegate
 import java.io.FileInputStream
 import java.io.IOException
 import java.nio.ByteBuffer
@@ -51,7 +50,9 @@ class TensoroidViewModel(private val getImage: GetImage) : ViewModel() {
     }
 
 
-    private fun transformSegmentation(bitmap: Bitmap?) {
+    fun transformSegmentation(bitmap: Bitmap?) {
+
+
         bitmap?.let { getBitmap ->
             val start = System.currentTimeMillis()
 
