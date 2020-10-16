@@ -3,6 +3,7 @@ package com.example.tensoroid.presenter
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
@@ -68,24 +69,30 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
 //                        buffer.get(bytes)
 //                        val convert = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
                         runOnUiThread {
-                            movieViewModel.transformSegmentation(binding.viewFinder.bitmap)
+
+                            val start = System.currentTimeMillis()
+                            binding.viewFinder.bitmap?.let { bitmap ->
+                                movieViewModel.inputSource(bitmap)
+                            }
+                            Log.d("결과", (System.currentTimeMillis() - start).toString())
                             image.close()
                         }
                     })
 
-            try {
-                // Unbind use cases before rebinding
-                cameraProvider.unbindAll()
+                try {
+                    // Unbind use cases before rebinding
+                    cameraProvider.unbindAll()
 
-                // Bind use cases to camera
-                cameraProvider.bindToLifecycle(
-                    this, cameraSelector, imageAnalysis,preview
-                )
+                    // Bind use cases to camera
+                    cameraProvider.bindToLifecycle(
+                        this, cameraSelector, imageAnalysis, preview
+                    )
 
-            } catch (exc: Exception) {
-            }
+                } catch (exc: Exception) {
+                }
 
-        }, ContextCompat.getMainExecutor(this))
+            }, ContextCompat.getMainExecutor(this)
+        )
     }
 
     private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
@@ -111,6 +118,9 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
             }
         }
     }
+
+
+
 
     companion object {
         private const val REQUEST_CODE_PERMISSIONS = 10
