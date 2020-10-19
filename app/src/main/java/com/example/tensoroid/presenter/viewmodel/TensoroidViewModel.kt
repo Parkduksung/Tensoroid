@@ -101,9 +101,9 @@ class TensoroidViewModel : ViewModel() {
 
                 // 사람이크면 흰색으로 그림.
                 if (personVal > backgroundVal) {
-//                    maskBitmap.setPixel(x, y, Color.TRANSPARENT)
+                    maskBitmap.setPixel(x, y, Color.WHITE)
                 } else {
-                    maskBitmap.setPixel(x, y, Color.BLACK)
+                    maskBitmap.setPixel(x, y, Color.GRAY)
                 }
 
             }
