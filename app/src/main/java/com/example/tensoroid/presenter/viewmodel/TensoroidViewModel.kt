@@ -103,9 +103,8 @@ class TensoroidViewModel : ViewModel() {
                 if (personVal > backgroundVal) {
                     maskBitmap.setPixel(x, y, Color.WHITE)
                 } else {
-                    maskBitmap.setPixel(x, y, Color.GRAY)
+                    maskBitmap.setPixel(x, y, Color.TRANSPARENT)
                 }
-
             }
         }
         return maskBitmap
