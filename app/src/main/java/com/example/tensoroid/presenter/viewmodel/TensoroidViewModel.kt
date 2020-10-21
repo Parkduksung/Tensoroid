@@ -1,11 +1,14 @@
 package com.example.tensoroid.presenter.viewmodel
 
 import android.graphics.Bitmap
+import android.graphics.Bitmap.createScaledBitmap
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.tensoroid.App
 import com.example.tensoroid.util.ImageUtils.bitmapToByteBuffer
+import com.example.tensoroid.util.ImageUtils.byteBufferToBitmap
 import com.example.tensoroid.util.ImageUtils.maskImage
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.gpu.GpuDelegate
@@ -34,30 +37,30 @@ class TensoroidViewModel : ViewModel() {
         )
     }
 
-    private var segmentedImage: Bitmap? = null
+    private var segmentedImageBuffer: ByteBuffer? = null
 
     private var isImageProcess = false
 
-    fun inputSource(bitmap: Bitmap) {
+    fun inputSource(byteBuffer: ByteBuffer) {
         if (!isImageProcess) {
             isImageProcess = true
             Thread {
-                segmentedImage = segmentImage(bitmap)
+                segmentedImageBuffer = getSegmentImageBuffer(byteBuffer)
                 isImageProcess = false
             }.start()
-
         }
-        _bitmapTransform.value = mergeBitmap(bitmap, segmentedImage)
+        _bitmapTransform.value = mergeBitmap(byteBuffer, segmentedImageBuffer)
     }
 
-    private fun mergeBitmap(bitmap: Bitmap, segmentedImage: Bitmap?): Bitmap {
-        if (segmentedImage == null) return bitmap
-        return maskImage(original = bitmap, mask = segmentedImage)
+    private fun mergeBitmap(original: ByteBuffer, segmentedBuffer: ByteBuffer?): ByteBuffer {
+        if (segmentedBuffer == null) return original
+        return maskImage(original = original, segmentedImage = segmentedBuffer)
     }
 
-    private fun segmentImage(bitmap: Bitmap): Bitmap {
+    private fun getSegmentImageBuffer(byteBuffer: ByteBuffer): ByteBuffer {
 
-        val resizeBitmap = Bitmap.createScaledBitmap(bitmap, IMAGE_SIZE, IMAGE_SIZE, true)
+        val resizeBitmap =
+            createScaledBitmap(byteBufferToBitmap(byteBuffer), IMAGE_SIZE, IMAGE_SIZE, true)
 
         val segmentationMasks =
             ByteBuffer.allocateDirect(IMAGE_SIZE * IMAGE_SIZE * NUM_CLASSES * TO_FLOAT)
@@ -69,20 +72,15 @@ class TensoroidViewModel : ViewModel() {
             segmentationMasks
         )
 
-        return Bitmap.createScaledBitmap(
-            convertBytebufferMaskToBitmap(segmentationMasks),
-            bitmap.width,
-            bitmap.height,
-            true
-        )
+        return segmentationMasks
     }
 
 
     private fun convertBytebufferMaskToBitmap(
         inputBuffer: ByteBuffer
-    ): Bitmap {
+    ): ByteBuffer {
 
-        val maskBitmap = Bitmap.createBitmap(IMAGE_SIZE, IMAGE_SIZE, Bitmap.Config.ARGB_8888)
+//        val maskBitmap = Bitmap.createBitmap(IMAGE_SIZE, IMAGE_SIZE, Bitmap.Config.ARGB_8888)
 
         //지금 이게 가로세로 257 x 257 에 픽셀 돌릴려는 거 같아보임.
         // 나한태 필요한건 0 : 배경, 15 : 사람 이니까 다른거 다 없앰.
@@ -101,9 +99,9 @@ class TensoroidViewModel : ViewModel() {
 
                 // 사람이크면 흰색으로 그림.
                 if (personVal > backgroundVal) {
-                    maskBitmap.setPixel(x, y, Color.WHITE)
-                } else {
                     maskBitmap.setPixel(x, y, Color.TRANSPARENT)
+                } else {
+                    maskBitmap.setPixel(x, y, Color.BLACK)
                 }
             }
         }
