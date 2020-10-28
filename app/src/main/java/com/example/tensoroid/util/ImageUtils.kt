@@ -1,11 +1,13 @@
 package com.example.tensoroid.util
 
 import android.graphics.*
+import android.media.Image
 import android.renderscript.Allocation
 import android.renderscript.Element
 import android.renderscript.RenderScript
 import android.renderscript.ScriptIntrinsicBlur
 import com.example.tensoroid.App
+import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
@@ -59,8 +61,7 @@ object ImageUtils {
         return Bitmap.createScaledBitmap(image, width, height, true)
     }
 
-    fun maskImage(original: Bitmap, mask: Bitmap): Bitmap {
-
+    fun maskImage(original: Bitmap, mask: Bitmap, blurRadius: Float): Bitmap {
 
 
         val result1 = Bitmap.createBitmap(original.width, original.height, Bitmap.Config.ARGB_8888)
@@ -73,7 +74,7 @@ object ImageUtils {
             Element.U8_4(renderScript)
         )
         blur.setInput(blurInput)
-        blur.setRadius(25.0f)
+        blur.setRadius(blurRadius)
         blur.forEach(blurOutput)
         blurOutput.copyTo(result1)
 
@@ -99,5 +100,35 @@ object ImageUtils {
 
         paint.xfermode = null
         return result2
+    }
+
+    fun Image.toBitmap(): Bitmap {
+
+        val yBuffer = planes[0].buffer // Y
+        val uBuffer = planes[1].buffer // U
+        val vBuffer = planes[2].buffer // V
+
+        val ySize = yBuffer.remaining()
+        val uSize = uBuffer.remaining()
+        val vSize = vBuffer.remaining()
+
+        val nv21 = ByteArray(ySize + uSize + vSize)
+
+        //U and V are swapped
+        yBuffer.get(nv21, 0, ySize)
+        vBuffer.get(nv21, ySize, vSize)
+        uBuffer.get(nv21, ySize + vSize, uSize)
+
+        val yuvImage = YuvImage(nv21, ImageFormat.NV21, this.width, this.height, null)
+        val out = ByteArrayOutputStream()
+        yuvImage.compressToJpeg(Rect(0, 0, yuvImage.width, yuvImage.height), 50, out)
+        val imageBytes = out.toByteArray()
+
+        val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+        val matrix = Matrix()
+        matrix.setScale(-1f, 1f)
+        matrix.postRotate(90f)
+
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
     }
 }

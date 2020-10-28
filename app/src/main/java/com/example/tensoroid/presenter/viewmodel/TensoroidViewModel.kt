@@ -38,7 +38,10 @@ class TensoroidViewModel : ViewModel() {
 
     private var isImageProcess = false
 
-    fun inputSource(bitmap: Bitmap) {
+    private var blurRadius = 0.1f
+
+    fun inputSource(bitmap: Bitmap, blurRadius: Float) {
+        this.blurRadius = blurRadius
         if (!isImageProcess) {
             isImageProcess = true
             Thread {
@@ -52,7 +55,7 @@ class TensoroidViewModel : ViewModel() {
 
     private fun mergeBitmap(bitmap: Bitmap, segmentedImage: Bitmap?): Bitmap {
         if (segmentedImage == null) return bitmap
-        return maskImage(original = bitmap, mask = segmentedImage)
+        return maskImage(original = bitmap, mask = segmentedImage, blurRadius = blurRadius)
     }
 
     private fun segmentImage(bitmap: Bitmap): Bitmap {
