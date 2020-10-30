@@ -39,15 +39,15 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-<!--        <ImageView-->
-<!--            android:id="@+id/iv_transform"-->
-<!--            android:layout_width="0dp"-->
-<!--            android:layout_height="0dp"-->
-<!--            app:layout_constraintEnd_toEndOf="parent"-->
-<!--            app:layout_constraintHeight_percent=".5"-->
-<!--            app:layout_constraintStart_toStartOf="parent"-->
-<!--            app:layout_constraintTop_toBottomOf="@id/viewFinder"-->
-<!--            app:setBitmap="@{VM.bitmapTransform}" />-->
+        <!--        <ImageView-->
+        <!--            android:id="@+id/iv_transform"-->
+        <!--            android:layout_width="0dp"-->
+        <!--            android:layout_height="0dp"-->
+        <!--            app:layout_constraintEnd_toEndOf="parent"-->
+        <!--            app:layout_constraintHeight_percent=".5"-->
+        <!--            app:layout_constraintStart_toStartOf="parent"-->
+        <!--            app:layout_constraintTop_toBottomOf="@id/viewFinder"-->
+        <!--            app:setBitmap="@{VM.bitmapTransform}" />-->
 
         <android.opengl.GLSurfaceView
             android:id="@+id/glsurface"

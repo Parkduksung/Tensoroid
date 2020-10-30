@@ -2,8 +2,7 @@ package com.example.tensoroid.util
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Canvas
-import android.graphics.Paint
+import java.lang.Exception
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
@@ -57,32 +56,15 @@ object ImageUtils {
         return Bitmap.createScaledBitmap(image, width, height, true)
     }
 
-    fun maskImage(original: Bitmap, mask: Bitmap): Bitmap {
-//
-//        val result1 = Bitmap.createBitmap(original.width, original.height, Bitmap.Config.ARGB_8888)
-//
-//        val renderScript: RenderScript = RenderScript.create(App.instance.context())
-//        val blurInput: Allocation = Allocation.createFromBitmap(renderScript, original)
-//        val blurOutput: Allocation = Allocation.createFromBitmap(renderScript, mask)
-//        val blur: ScriptIntrinsicBlur = ScriptIntrinsicBlur.create(
-//            renderScript,
-//            Element.U8_4(renderScript)
-//        )
-//        blur.setInput(blurInput)
-//        blur.setRadius(25.0f)
-//        blur.forEach(blurOutput)
-//        blurOutput.copyTo(result1)
-//
-//        renderScript.destroy()
+    fun maskImage(original: ByteBuffer, mask: ByteBuffer): Bitmap {
 
-
-        val result = Bitmap.createBitmap(original.width, original.height, Bitmap.Config.ARGB_8888)
-        val mCanvas = Canvas(result)
-        val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+        //        val result = Bitmap.createBitmap(original.width, original.height, Bitmap.Config.ARGB_8888)
+//        val mCanvas = Canvas(result)
+//        val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         //https://developer.android.com/reference/android/graphics/PorterDuff.Mode.html 참고.
 //        paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.MULTIPLY)
-        mCanvas.drawBitmap(original, 0f, 0f, null)
-        mCanvas.drawBitmap(mask, 0f, 0f, paint)
+//        mCanvas.drawBitmap(original, 0f, 0f, null)
+//        mCanvas.drawBitmap(mask, 0f, 0f, paint)
 
 
 //        val result2 = Bitmap.createBitmap(original.width, original.height, Bitmap.Config.ARGB_8888)
@@ -94,7 +76,7 @@ object ImageUtils {
 //        mCanva1.drawBitmap(result1, 0f, 0f, paint)
 //
 //        paint.xfermode = null
-        return result
+        return BitmapFactory.decodeByteArray(original.array(), 0, original.array().size)
     }
 
     fun byteBufferToBitmap(byteBuffer: ByteBuffer): Bitmap =

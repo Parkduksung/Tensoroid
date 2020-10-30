@@ -6,7 +6,6 @@ import android.graphics.BitmapFactory
 import android.opengl.GLES20
 import android.opengl.GLSurfaceView
 import android.opengl.GLSurfaceView.RENDERMODE_CONTINUOUSLY
-import android.opengl.GLSurfaceView.RENDERMODE_WHEN_DIRTY
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -16,13 +15,13 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.Observer
 import com.example.tensoroid.App
 import com.example.tensoroid.R
 import com.example.tensoroid.base.BaseActivity
 import com.example.tensoroid.databinding.ActivityMainBinding
 import com.example.tensoroid.presenter.viewmodel.TensoroidViewModel
 import com.example.tensoroid.util.Tex
+import kotlinx.android.synthetic.main.activity_main.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.io.IOException
 import java.util.concurrent.Executors
@@ -44,7 +43,7 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
 //            mTex = Tex(it)
 //        }
 
-        init()
+//        init()
     }
 
     override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
@@ -57,13 +56,14 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
 //        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f)
 
 //        Log.d("결과", "결과찍힘")
-        if (toggle) {
-            GLES20.glClear(GL10.GL_COLOR_BUFFER_BIT)
-            GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f)
-            Log.d("결과", "결과찍힘1")
-            mTex.draw()
-            toggle = false
-        }
+//        if (toggle) {
+//            GLES20.glClear(GL10.GL_COLOR_BUFFER_BIT)
+//            GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f)
+//            Log.d("결과", "결과찍힘1")
+//            mTex.draw()
+//            toggle = false
+//        }
+
 
 //        tex.draw()
     }
@@ -76,6 +76,7 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
             val bitmap = BitmapFactory.decodeStream(inputStream)
 
             mTex = Tex(bitmap)
+
 //            binding.viewFinder.bitmap?.let { mTex = Tex(it) }
         } catch (e: IOException) {
             e.printStackTrace()
@@ -88,8 +89,6 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
         binding.run {
             vm = movieViewModel
         }
-
-//        mTex = Tex(binding.viewFinder.bitmap!!)
 
         binding.glsurface.setEGLContextClientVersion(2)
         binding.glsurface.preserveEGLContextOnPause = true
@@ -104,9 +103,16 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
             )
         }
 
-//        movieViewModel.bitmapTransform.observe(this, Observer { bitmap->
-//            mTex = Tex(bitmap)
-//        })
+        val input = "\\\\left(\\\\begin{array}{cc} \\\\frac{1}{3} & x\\\\\\\\ \\\\mathrm{e}^{x} &... x^2 \\\\end{array}\\\\right)"
+
+        val replaceString = input.trim().replace("[", "!").replace("]", "*")
+
+        val convertString = replaceString.trim().replace(Regex("^[(){}*!]"), "")
+
+        val toConvertString = convertString.trim().replace("!", "[").replace("*", "]")
+
+        Log.d("결과는?", toConvertString)
+
     }
 
 
@@ -130,44 +136,12 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
                     .build()
 
 
-
-
                 imageAnalysis.setAnalyzer(
                     Executors.newSingleThreadExecutor(),
                     ImageAnalysis.Analyzer { image ->
-
                         val toByteBuffer = image.planes[0].buffer
 
-                        movieViewModel.inputSource(toByteBuffer)
-
-//                        binding.glsurface.queueEvent {
-//
-//
-//                            binding.viewFinder.bitmap?.let{
-//                                toggle= true
-//                                mTex = Tex(it)
-//                                image.close()
-//                            }
-//
-////                            runOnUiThread {
-////
-////
-//////                                image.close()
-////
-////                            }
-//                        }
-//                        runOnUiThread {
-//
-//
-//                            val start = System.currentTimeMillis()
-//                            binding.viewFinder.bitmap?.let { bitmap ->
-//                                movieViewModel.inputSource(bitmap)
-//
-//                            }
-//
-//                            Log.d("결과", (System.currentTimeMillis() - start).toString())
-//                            image.close()
-//                        }
+//                        movieViewModel.inputSource(toByteBuffer)
                     })
 
                 try {
