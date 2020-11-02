@@ -8,7 +8,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.tensoroid.App
 import com.example.tensoroid.util.ImageUtils.bitmapToByteBuffer
-import com.example.tensoroid.util.ImageUtils.byteBufferToBitmap
 import com.example.tensoroid.util.ImageUtils.maskImage
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.gpu.GpuDelegate
@@ -21,7 +20,7 @@ import java.nio.channels.FileChannel
 
 class TensoroidViewModel : ViewModel() {
 
-    private val _bitmapTransform = MutableLiveData<Bitmap>()
+    private val _bitmapTransform = MutableLiveData<ByteBuffer>()
     val bitmapTransform
         get() = _bitmapTransform
 
@@ -52,61 +51,59 @@ class TensoroidViewModel : ViewModel() {
         _bitmapTransform.value = mergeBitmap(byteBuffer, segmentedImageBuffer)
     }
 
-    private fun mergeBitmap(original: ByteBuffer, segmentedBuffer: ByteBuffer?): Bitmap {
-        if (segmentedBuffer == null) return BitmapFactory.decodeByteArray(original.array(), 0, original.array().size)
+    private fun mergeBitmap(original: ByteBuffer, segmentedBuffer: ByteBuffer?): ByteBuffer {
+        if (segmentedBuffer == null) return original
         return maskImage(original = original, mask = segmentedBuffer)
     }
 
     private fun getSegmentImageBuffer(byteBuffer: ByteBuffer): ByteBuffer {
 
-        val resizeBitmap =
-            createScaledBitmap(byteBufferToBitmap(byteBuffer), IMAGE_SIZE, IMAGE_SIZE, true)
+
+//        val resizeBitmap =
+//            createScaledBitmap(byteBufferToBitmap(byteBuffer), IMAGE_SIZE, IMAGE_SIZE, true)
 
         val segmentationMasks =
             ByteBuffer.allocateDirect(IMAGE_SIZE * IMAGE_SIZE * NUM_CLASSES * TO_FLOAT)
 
         segmentationMasks.order(ByteOrder.nativeOrder())
 
-        interpreter.run(
-            bitmapToByteBuffer(resizeBitmap, IMAGE_SIZE, IMAGE_SIZE),
-            segmentationMasks
-        )
+//        interpreter.run(
+//            bitmapToByteBuffer(resizeBitmap, IMAGE_SIZE, IMAGE_SIZE),
+//            segmentationMasks
+//        )
 
-        return segmentationMasks
+        return byteBuffer
     }
 
 
-//    private fun convertBytebufferMaskToBitmap(
-//        inputBuffer: ByteBuffer
-//    ): ByteBuffer {
-//
-////        val maskBitmap = Bitmap.createBitmap(IMAGE_SIZE, IMAGE_SIZE, Bitmap.Config.ARGB_8888)
-//
-//        //지금 이게 가로세로 257 x 257 에 픽셀 돌릴려는 거 같아보임.
-//        // 나한태 필요한건 0 : 배경, 15 : 사람 이니까 다른거 다 없앰.
-//
-//        for (y in 0 until IMAGE_SIZE) {
-//            for (x in 0 until IMAGE_SIZE) {
-//
-//                //c = 0 배경 , c = 15
-//                // 배경
-//                val backgroundVal = inputBuffer
-//                    .getFloat((((y * IMAGE_SIZE) + x) * NUM_CLASSES) * TO_FLOAT)
-//
-//                // 사람
-//                val personVal = inputBuffer
-//                    .getFloat((((y * IMAGE_SIZE) + x) * NUM_CLASSES + NUM_PERSON) * TO_FLOAT)
-//
-//                // 사람이크면 흰색으로 그림.
-//                if (personVal > backgroundVal) {
-//                    maskBitmap.setPixel(x, y, Color.TRANSPARENT)
-//                } else {
-//                    maskBitmap.setPixel(x, y, Color.BLACK)
-//                }
-//            }
-//        }
-//        return maskBitmap
-//    }
+    private fun convertBytebufferMaskToBitmap(
+        inputBuffer: ByteBuffer
+    ): ByteBuffer {
+        val maskBitmap = Bitmap.createBitmap(IMAGE_SIZE, IMAGE_SIZE, Bitmap.Config.ARGB_8888)
+
+        //지금 이게 가로세로 257 x 257 에 픽셀 돌릴려는 거 같아보임.
+        // 나한태 필요한건 0 : 배경, 15 : 사람 이니까 다른거 다 없앰.
+        for (y in 0 until IMAGE_SIZE) {
+            for (x in 0 until IMAGE_SIZE) {
+                //c = 0 배경 , c = 15
+                // 배경
+                val backgroundVal = inputBuffer
+                    .getFloat((((y * IMAGE_SIZE) + x) * NUM_CLASSES) * TO_FLOAT)
+
+                // 사람
+                val personVal = inputBuffer
+                    .getFloat((((y * IMAGE_SIZE) + x) * NUM_CLASSES + NUM_PERSON) * TO_FLOAT)
+
+                // 사람이크면 흰색으로 그림.
+                if (personVal > backgroundVal) {
+                    maskBitmap.setPixel(x, y, Color.TRANSPARENT)
+                } else {
+                    maskBitmap.setPixel(x, y, Color.BLACK)
+                }
+            }
+        }
+        return inputBuffer
+    }
 
     @Throws(IOException::class)
     private fun loadModelFile(): MappedByteBuffer {

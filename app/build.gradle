@@ -65,8 +65,8 @@ dependencies {
 
 
     //tensor_flow_lite
-    implementation('org.tensorflow:tensorflow-lite:0.0.0-nightly') { changing = true }
-    implementation('org.tensorflow:tensorflow-lite-gpu:0.0.0-nightly') { changing = true }
+    implementation('org.tensorflow:tensorflow-lite:2.2.0') { changing = true }
+    implementation('org.tensorflow:tensorflow-lite-gpu:2.2.0') { changing = true }
 
     //koin
     implementation "org.koin:koin-androidx-scope:$koin_version"

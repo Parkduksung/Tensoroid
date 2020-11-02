@@ -56,31 +56,13 @@ object ImageUtils {
         return Bitmap.createScaledBitmap(image, width, height, true)
     }
 
-    fun maskImage(original: ByteBuffer, mask: ByteBuffer): Bitmap {
+    fun maskImage(original: ByteBuffer, mask: ByteBuffer): ByteBuffer {
 
-        //        val result = Bitmap.createBitmap(original.width, original.height, Bitmap.Config.ARGB_8888)
-//        val mCanvas = Canvas(result)
-//        val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-        //https://developer.android.com/reference/android/graphics/PorterDuff.Mode.html 참고.
-//        paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.MULTIPLY)
-//        mCanvas.drawBitmap(original, 0f, 0f, null)
-//        mCanvas.drawBitmap(mask, 0f, 0f, paint)
-
-
-//        val result2 = Bitmap.createBitmap(original.width, original.height, Bitmap.Config.ARGB_8888)
-//        val mCanva1 = Canvas(result2)
-//        val paint1 = Paint(Paint.ANTI_ALIAS_FLAG)
-//        //https://developer.android.com/reference/android/graphics/PorterDuff.Mode.html 참고.
-//        paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_ATOP)
-//        mCanva1.drawBitmap(result, 0f, 0f, null)
-//        mCanva1.drawBitmap(result1, 0f, 0f, paint)
-//
-//        paint.xfermode = null
-        return BitmapFactory.decodeByteArray(original.array(), 0, original.array().size)
+        return original
     }
 
-    fun byteBufferToBitmap(byteBuffer: ByteBuffer): Bitmap =
-        BitmapFactory.decodeByteArray(byteBuffer.array(), 0, byteBuffer.array().size)
+//    fun byteBufferToBitmap(byteBuffer: ByteBuffer): Bitmap =
+//        BitmapFactory.decodeByteArray(byteBuffer.array(), 0, byteBuffer.array().size)
 
 
 //    fun maskImage(original: ByteBuffer, segment: ByteBuffer): ByteBuffer {

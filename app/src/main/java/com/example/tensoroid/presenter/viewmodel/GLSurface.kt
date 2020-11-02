@@ -2,10 +2,10 @@ package com.example.tensoroid.presenter.viewmodel
 
 import android.opengl.EGL14
 import android.opengl.EGLConfig
+import android.util.Log
 import android.view.Surface
 
 class GLSurface {
-
 
     private lateinit var inputSurface: Surface
 
@@ -102,6 +102,39 @@ class GLSurface {
         if (mEGLSurface == null) {
             throw RuntimeException("surface was null")
         }
+    }
+
+    /**
+     * Makes our EGL context and surface current
+     */
+    protected fun attachEglContext(): Boolean {
+        if (mEGLSurface === EGL14.EGL_NO_SURFACE) {
+            Log.e("", "EGLSurface is EGL_NO_SURFACE")
+            return false
+        }
+        if (!EGL14.eglMakeCurrent(mEGLDisplay, mEGLSurface, mEGLSurface, mEGLContext)) {
+            Log.e("", "eglMakeCurrent")
+            return false
+        }
+        return true
+    }
+
+    protected fun detachEglContext() {
+        if (mEGLDisplay != null) {
+            EGL14.eglMakeCurrent(
+                mEGLDisplay,
+                EGL14.EGL_NO_SURFACE,
+                EGL14.EGL_NO_SURFACE,
+                EGL14.EGL_NO_CONTEXT
+            )
+        }
+    }
+
+    /**
+     * Calls eglSwapBuffers. Use this to "publish" the current frame.
+     */
+    fun swapBuffers(): Boolean {
+        return EGL14.eglSwapBuffers(mEGLDisplay, mEGLSurface)
     }
 
     companion object {
