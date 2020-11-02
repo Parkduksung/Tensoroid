@@ -41,21 +41,21 @@ class TensoroidViewModel : ViewModel() {
 
     private var isImageProcess = false
 
-    fun inputSource(byteBuffer: ByteBuffer) {
-        if (!isImageProcess) {
-            isImageProcess = true
-            Thread {
-                segmentedImageBuffer = getSegmentImageBuffer(byteBuffer)
-                isImageProcess = false
-            }.start()
-        }
-        _bitmapTransform.value = mergeBitmap(byteBuffer, segmentedImageBuffer)
-    }
+//    fun inputSource(byteBuffer: ByteBuffer) {
+//        if (!isImageProcess) {
+//            isImageProcess = true
+//            Thread {
+//                segmentedImageBuffer = getSegmentImageBuffer(byteBuffer)
+//                isImageProcess = false
+//            }.start()
+//        }
+//        _bitmapTransform.value = mergeBitmap(byteBuffer, segmentedImageBuffer)
+//    }
 
-    private fun mergeBitmap(original: ByteBuffer, segmentedBuffer: ByteBuffer?): ByteBuffer {
-        if (segmentedBuffer == null) return original
-        return maskImage(original = original, segmentedImage = segmentedBuffer)
-    }
+//    private fun mergeBitmap(original: ByteBuffer, segmentedBuffer: ByteBuffer?): ByteBuffer {
+//        if (segmentedBuffer == null) return original
+//        return maskImage(original = original, segmentedImage = segmentedBuffer)
+//    }
 
     private fun getSegmentImageBuffer(byteBuffer: ByteBuffer): ByteBuffer {
 
@@ -76,37 +76,37 @@ class TensoroidViewModel : ViewModel() {
     }
 
 
-    private fun convertBytebufferMaskToBitmap(
-        inputBuffer: ByteBuffer
-    ): ByteBuffer {
-
-//        val maskBitmap = Bitmap.createBitmap(IMAGE_SIZE, IMAGE_SIZE, Bitmap.Config.ARGB_8888)
-
-        //지금 이게 가로세로 257 x 257 에 픽셀 돌릴려는 거 같아보임.
-        // 나한태 필요한건 0 : 배경, 15 : 사람 이니까 다른거 다 없앰.
-
-        for (y in 0 until IMAGE_SIZE) {
-            for (x in 0 until IMAGE_SIZE) {
-
-                //c = 0 배경 , c = 15
-                // 배경
-                val backgroundVal = inputBuffer
-                    .getFloat((((y * IMAGE_SIZE) + x) * NUM_CLASSES) * TO_FLOAT)
-
-                // 사람
-                val personVal = inputBuffer
-                    .getFloat((((y * IMAGE_SIZE) + x) * NUM_CLASSES + NUM_PERSON) * TO_FLOAT)
-
-                // 사람이크면 흰색으로 그림.
-                if (personVal > backgroundVal) {
-                    maskBitmap.setPixel(x, y, Color.TRANSPARENT)
-                } else {
-                    maskBitmap.setPixel(x, y, Color.BLACK)
-                }
-            }
-        }
-        return maskBitmap
-    }
+//    private fun convertBytebufferMaskToBitmap(
+//        inputBuffer: ByteBuffer
+//    ): ByteBuffer {
+//
+////        val maskBitmap = Bitmap.createBitmap(IMAGE_SIZE, IMAGE_SIZE, Bitmap.Config.ARGB_8888)
+//
+//        //지금 이게 가로세로 257 x 257 에 픽셀 돌릴려는 거 같아보임.
+//        // 나한태 필요한건 0 : 배경, 15 : 사람 이니까 다른거 다 없앰.
+//
+//        for (y in 0 until IMAGE_SIZE) {
+//            for (x in 0 until IMAGE_SIZE) {
+//
+//                //c = 0 배경 , c = 15
+//                // 배경
+//                val backgroundVal = inputBuffer
+//                    .getFloat((((y * IMAGE_SIZE) + x) * NUM_CLASSES) * TO_FLOAT)
+//
+//                // 사람
+//                val personVal = inputBuffer
+//                    .getFloat((((y * IMAGE_SIZE) + x) * NUM_CLASSES + NUM_PERSON) * TO_FLOAT)
+//
+//                // 사람이크면 흰색으로 그림.
+//                if (personVal > backgroundVal) {
+//                    maskBitmap.setPixel(x, y, Color.TRANSPARENT)
+//                } else {
+//                    maskBitmap.setPixel(x, y, Color.BLACK)
+//                }
+//            }
+//        }
+//        return maskBitmap
+//    }
 
     @Throws(IOException::class)
     private fun loadModelFile(): MappedByteBuffer {

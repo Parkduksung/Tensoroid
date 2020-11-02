@@ -2,7 +2,7 @@ package com.example.tensoroid.presenter
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.graphics.BitmapFactory
+import android.graphics.*
 import android.opengl.GLES20
 import android.opengl.GLSurfaceView
 import android.opengl.GLSurfaceView.RENDERMODE_CONTINUOUSLY
@@ -12,6 +12,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
@@ -24,6 +25,7 @@ import com.example.tensoroid.databinding.ActivityMainBinding
 import com.example.tensoroid.presenter.viewmodel.TensoroidViewModel
 import com.example.tensoroid.util.Tex
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.util.concurrent.Executors
 import javax.microedition.khronos.egl.EGLConfig
@@ -39,12 +41,12 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
 
     private var toggle: Boolean = false
 
-    override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
-//        binding.viewFinder.bitmap?.let {
-//            mTex = Tex(it)
-//        }
+    private lateinit var bitmap: Bitmap
 
-        init()
+    override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
+//
+//        mTex = Tex(bitmap)
+
     }
 
     override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
@@ -55,32 +57,21 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
     override fun onDrawFrame(gl: GL10?) {
 //        GLES20.glClear(GL10.GL_COLOR_BUFFER_BIT)
 //        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f)
+//
+//        if (toggle) {
 
-//        Log.d("결과", "결과찍힘")
-        if (toggle) {
+        if (::bitmap.isInitialized) {
+            mTex = Tex(bitmap)
             GLES20.glClear(GL10.GL_COLOR_BUFFER_BIT)
             GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f)
             Log.d("결과", "결과찍힘1")
             mTex.draw()
-            toggle = false
         }
+//            toggle = false
+//        }
 
-//        tex.draw()
     }
 
-    private fun init() {
-        try {
-
-//            mTex = Tex(binding.viewFinder.bitmap!!)
-            val inputStream = App.instance.assets.open("image.png")
-            val bitmap = BitmapFactory.decodeStream(inputStream)
-
-            mTex = Tex(bitmap)
-//            binding.viewFinder.bitmap?.let { mTex = Tex(it) }
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -88,6 +79,8 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
         binding.run {
             vm = movieViewModel
         }
+
+//        mTex = Tex(binding.viewFinder.bitmap!!)
 
 //        mTex = Tex(binding.viewFinder.bitmap!!)
 
@@ -136,38 +129,20 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
                     Executors.newSingleThreadExecutor(),
                     ImageAnalysis.Analyzer { image ->
 
-                        val toByteBuffer = image.planes[0].buffer
+//                        val toByteBuffer = image.planes[0].buffer
 
-                        movieViewModel.inputSource(toByteBuffer)
+//                        movieViewModel.inputSource(toByteBuffer)
 
-//                        binding.glsurface.queueEvent {
-//
-//
-//                            binding.viewFinder.bitmap?.let{
-//                                toggle= true
-//                                mTex = Tex(it)
-//                                image.close()
-//                            }
-//
-////                            runOnUiThread {
-////
-////
-//////                                image.close()
-////
-////                            }
-//                        }
-//                        runOnUiThread {
-//
-//
-//                            val start = System.currentTimeMillis()
-//                            binding.viewFinder.bitmap?.let { bitmap ->
-//                                movieViewModel.inputSource(bitmap)
-//
-//                            }
-//
-//                            Log.d("결과", (System.currentTimeMillis() - start).toString())
-//                            image.close()
-//                        }
+                        bitmap = image.toBitmap()
+//                        mTex = Tex(image.toBitmap())
+//                        mTex = Tex(image.toBitmap())
+                        runOnUiThread {
+//                            bitmap = image.toBitmap()
+//                            mTex.draw()
+//                            mTex = Tex(image.toBitmap())
+
+                            image.close()
+                        }
                     })
 
                 try {
@@ -208,6 +183,39 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
                 finish()
             }
         }
+    }
+
+
+    private fun ImageProxy.toBitmap(): Bitmap {
+        val start = System.currentTimeMillis()
+        val yBuffer = this.planes[0].buffer // Y
+        val uBuffer = this.planes[1].buffer // U
+        val vBuffer = this.planes[2].buffer // V
+
+        val ySize = yBuffer.remaining()
+        val uSize = uBuffer.remaining()
+        val vSize = vBuffer.remaining()
+
+        val nv21 = ByteArray(ySize + uSize + vSize)
+
+        //U and V are swapped
+        yBuffer.get(nv21, 0, ySize)
+        vBuffer.get(nv21, ySize, vSize)
+        uBuffer.get(nv21, ySize + vSize, uSize)
+
+        val yuvImage = YuvImage(nv21, ImageFormat.NV21, this.width, this.height, null)
+        val out = ByteArrayOutputStream()
+        yuvImage.compressToJpeg(Rect(0, 0, yuvImage.width, yuvImage.height), 60, out)
+        val imageBytes = out.toByteArray()
+
+        val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+        val matrix = Matrix()
+        matrix.setScale(-1f, 1f)
+        matrix.postRotate(90f)
+
+        Log.d("결과", (System.currentTimeMillis() - start).toString())
+
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
     }
 
 
