@@ -39,13 +39,9 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
 
     private lateinit var mTex: Tex
 
-    private var toggle: Boolean = false
-
     private lateinit var bitmap: Bitmap
 
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
-//
-//        mTex = Tex(bitmap)
 
     }
 
@@ -55,21 +51,13 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
     }
 
     override fun onDrawFrame(gl: GL10?) {
-//        GLES20.glClear(GL10.GL_COLOR_BUFFER_BIT)
-//        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f)
-//
-//        if (toggle) {
+        GLES20.glClear(GL10.GL_COLOR_BUFFER_BIT)
+        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f)
 
         if (::bitmap.isInitialized) {
-            mTex = Tex(bitmap)
-            GLES20.glClear(GL10.GL_COLOR_BUFFER_BIT)
-            GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f)
-            Log.d("결과", "결과찍힘1")
-            mTex.draw()
+                mTex = Tex(bitmap)
+                mTex.draw()
         }
-//            toggle = false
-//        }
-
     }
 
 
@@ -79,10 +67,6 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
         binding.run {
             vm = movieViewModel
         }
-
-//        mTex = Tex(binding.viewFinder.bitmap!!)
-
-//        mTex = Tex(binding.viewFinder.bitmap!!)
 
         binding.glsurface.setEGLContextClientVersion(2)
         binding.glsurface.preserveEGLContextOnPause = true
@@ -97,9 +81,9 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
             )
         }
 
-//        movieViewModel.bitmapTransform.observe(this, Observer { bitmap->
-//            mTex = Tex(bitmap)
-//        })
+        movieViewModel.bitmapTransform.observe(this, Observer {
+            bitmap = it
+        })
     }
 
 
@@ -122,25 +106,12 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
                     .setImageQueueDepth(ImageAnalysis.STRATEGY_BLOCK_PRODUCER)
                     .build()
 
-
-
-
                 imageAnalysis.setAnalyzer(
                     Executors.newSingleThreadExecutor(),
                     ImageAnalysis.Analyzer { image ->
 
-//                        val toByteBuffer = image.planes[0].buffer
-
-//                        movieViewModel.inputSource(toByteBuffer)
-
-                        bitmap = image.toBitmap()
-//                        mTex = Tex(image.toBitmap())
-//                        mTex = Tex(image.toBitmap())
                         runOnUiThread {
-//                            bitmap = image.toBitmap()
-//                            mTex.draw()
-//                            mTex = Tex(image.toBitmap())
-
+                            movieViewModel.inputSource(image.toBitmap())
                             image.close()
                         }
                     })
@@ -205,7 +176,7 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
 
         val yuvImage = YuvImage(nv21, ImageFormat.NV21, this.width, this.height, null)
         val out = ByteArrayOutputStream()
-        yuvImage.compressToJpeg(Rect(0, 0, yuvImage.width, yuvImage.height), 60, out)
+        yuvImage.compressToJpeg(Rect(0, 0, yuvImage.width, yuvImage.height), 70, out)
         val imageBytes = out.toByteArray()
 
         val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
