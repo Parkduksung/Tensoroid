@@ -22,7 +22,6 @@ object ImageUtils {
         mean: Float = 0.0f,
         std: Float = 255.0f
     ): ByteBuffer {
-//        val bitmap = getResizedBitmap(bitmapIn, width)
         val inputImage = ByteBuffer.allocateDirect(1 * width * height * 3 * 4)
         inputImage.order(ByteOrder.nativeOrder())
         inputImage.rewind()
@@ -94,7 +93,6 @@ object ImageUtils {
 
         val result2 = Bitmap.createBitmap(original.width, original.height, Bitmap.Config.ARGB_8888)
         val mCanva1 = Canvas(result2)
-        val paint1 = Paint(Paint.ANTI_ALIAS_FLAG)
         //https://developer.android.com/reference/android/graphics/PorterDuff.Mode.html 참고.
         paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_ATOP)
         mCanva1.drawBitmap(result, 0f, 0f, null)
@@ -102,36 +100,6 @@ object ImageUtils {
 
         paint.xfermode = null
         return result2
-    }
-
-    fun Image.toBitmap(): Bitmap {
-
-        val yBuffer = planes[0].buffer // Y
-        val uBuffer = planes[1].buffer // U
-        val vBuffer = planes[2].buffer // V
-
-        val ySize = yBuffer.remaining()
-        val uSize = uBuffer.remaining()
-        val vSize = vBuffer.remaining()
-
-        val nv21 = ByteArray(ySize + uSize + vSize)
-
-        //U and V are swapped
-        yBuffer.get(nv21, 0, ySize)
-        vBuffer.get(nv21, ySize, vSize)
-        uBuffer.get(nv21, ySize + vSize, uSize)
-
-        val yuvImage = YuvImage(nv21, ImageFormat.NV21, this.width, this.height, null)
-        val out = ByteArrayOutputStream()
-        yuvImage.compressToJpeg(Rect(0, 0, yuvImage.width, yuvImage.height), 50, out)
-        val imageBytes = out.toByteArray()
-
-        val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
-        val matrix = Matrix()
-        matrix.setScale(-1f, 1f)
-        matrix.postRotate(90f)
-
-        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
     }
 
     private fun blurFast(bmp: Bitmap, radius: Int) {
