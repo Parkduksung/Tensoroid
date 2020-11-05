@@ -2,6 +2,7 @@ package com.example.tensoroid.presenter
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -11,6 +12,7 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import com.example.tensoroid.R
 import com.example.tensoroid.base.BaseActivity
 import com.example.tensoroid.databinding.ActivityMainBinding
@@ -21,12 +23,18 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.concurrent.Executors
 
 
-class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
+class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main),
+    BottomSheetDialog.SelectColorListener {
 
     private val movieViewModel by viewModel<TensoroidViewModel>()
 
     private var blurNum: Float = 0.1f
 
+    override fun setColor(color: Int) {
+        movieViewModel.toggle = (color == Color.TRANSPARENT)
+        slider.isVisible = (color == Color.TRANSPARENT)
+        movieViewModel.color = color
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,7 +42,7 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
         binding.run {
             vm = movieViewModel
         }
-
+        slider.isVisible = false
         if (allPermissionsGranted()) {
             startCamera()
         } else {
@@ -42,11 +50,19 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
                 this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
             )
         }
-
         slider.addOnChangeListener { slider, value, fromUser ->
+            if (!movieViewModel.toggle)
+                slider.value = 0.0f
+
             if (value > 0.0f && value <= 25.0f)
                 blurNum = value
         }
+
+
+        fb_capture.setOnClickListener {
+            BottomSheetDialog().show(supportFragmentManager, "BottomSheetDialog")
+        }
+
     }
 
     private fun startCamera() {

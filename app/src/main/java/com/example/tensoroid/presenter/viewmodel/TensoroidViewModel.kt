@@ -34,11 +34,17 @@ class TensoroidViewModel : ViewModel() {
         )
     }
 
+
     private var segmentedImage: Bitmap? = null
 
     private var isImageProcess = false
 
     private var blurRadius = 0.1f
+
+
+    var color = 0
+
+    var toggle = false
 
     fun inputSource(bitmap: Bitmap, blurRadius: Float) {
         this.blurRadius = blurRadius
@@ -55,8 +61,9 @@ class TensoroidViewModel : ViewModel() {
 
     private fun mergeBitmap(bitmap: Bitmap, segmentedImage: Bitmap?): Bitmap {
         if (segmentedImage == null) return bitmap
-        return maskImage(original = bitmap, mask = segmentedImage, blurRadius = blurRadius)
+        return maskImage(original = bitmap, mask = segmentedImage, blurRadius = blurRadius , toggle = toggle)
     }
+
 
     private fun segmentImage(bitmap: Bitmap): Bitmap {
 
@@ -80,13 +87,14 @@ class TensoroidViewModel : ViewModel() {
         )
     }
 
-
     private fun convertBytebufferMaskToBitmap(
         inputBuffer: ByteBuffer
     ): Bitmap {
 
         val maskBitmap = Bitmap.createBitmap(IMAGE_SIZE, IMAGE_SIZE, Bitmap.Config.ARGB_8888)
 
+
+        val t = Color.BLACK
         //지금 이게 가로세로 257 x 257 에 픽셀 돌릴려는 거 같아보임.
         // 나한태 필요한건 0 : 배경, 15 : 사람 이니까 다른거 다 없앰.
 
@@ -104,9 +112,14 @@ class TensoroidViewModel : ViewModel() {
 
                 // 사람이크면 흰색으로 그림.
                 if (personVal > backgroundVal) {
-                    maskBitmap.setPixel(x, y, Color.WHITE)
+                    if(toggle){
+                        maskBitmap.setPixel(x, y, Color.WHITE)
+                    }else{
+                        maskBitmap.setPixel(x, y, Color.TRANSPARENT)
+                    }
+//                    maskBitmap.setPixel(x, y, Color.WHITE)
                 } else {
-                    maskBitmap.setPixel(x, y, Color.TRANSPARENT)
+                    maskBitmap.setPixel(x, y, color)
                 }
             }
         }
