@@ -2,38 +2,26 @@ package com.example.tensoroid.presenter.viewmodel
 
 import android.graphics.Bitmap
 import android.graphics.Color
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.tensoroid.App
-import com.example.tensoroid.util.ImageUtils.bitmapToByteBuffer
+import com.example.tensoroid.presenter.TensorFlow
 import com.example.tensoroid.util.ImageUtils.maskImage
-import org.tensorflow.lite.Interpreter
-import org.tensorflow.lite.gpu.GpuDelegate
-import java.io.FileInputStream
-import java.io.IOException
 import java.nio.ByteBuffer
-import java.nio.ByteOrder
-import java.nio.MappedByteBuffer
-import java.nio.channels.FileChannel
 
 class TensoroidViewModel : ViewModel() {
 
     private val _bitmapTransform = MutableLiveData<Bitmap>()
-    val bitmapTransform
+    val bitmapTransform: LiveData<Bitmap>
         get() = _bitmapTransform
 
 
-    private val interpreter by lazy {
-        Interpreter(
-            loadModelFile(),
-            Interpreter.Options().apply {
-                setNumThreads(4)
-                addDelegate(GpuDelegate())
-                setAllowBufferHandleOutput(false)
-            }
-        )
-    }
+    private val _bgColorTransform = MutableLiveData<Int>()
+    val bgColorTransform: LiveData<Int>
+        get() = _bgColorTransform
 
+
+    private val tensorFlow by lazy { TensorFlow() }
 
     private var segmentedImage: Bitmap? = null
 
@@ -41,17 +29,21 @@ class TensoroidViewModel : ViewModel() {
 
     private var blurRadius = 0.1f
 
-
     var color = 0
 
-    var toggle = false
+    var toggle = true
 
     fun inputSource(bitmap: Bitmap, blurRadius: Float) {
         this.blurRadius = blurRadius
         if (!isImageProcess) {
             isImageProcess = true
             Thread {
-                segmentedImage = segmentImage(bitmap)
+                segmentedImage = Bitmap.createScaledBitmap(
+                    convertByteBufferMaskToBitmap(tensorFlow.segmentImage(bitmap)),
+                    bitmap.width,
+                    bitmap.height,
+                    true
+                )
                 isImageProcess = false
             }.start()
 
@@ -61,40 +53,26 @@ class TensoroidViewModel : ViewModel() {
 
     private fun mergeBitmap(bitmap: Bitmap, segmentedImage: Bitmap?): Bitmap {
         if (segmentedImage == null) return bitmap
-        return maskImage(original = bitmap, mask = segmentedImage, blurRadius = blurRadius , toggle = toggle)
-    }
-
-
-    private fun segmentImage(bitmap: Bitmap): Bitmap {
-
-        val resizeBitmap = Bitmap.createScaledBitmap(bitmap, IMAGE_SIZE, IMAGE_SIZE, true)
-
-        val segmentationMasks =
-            ByteBuffer.allocateDirect(IMAGE_SIZE * IMAGE_SIZE * NUM_CLASSES * TO_FLOAT)
-
-        segmentationMasks.order(ByteOrder.nativeOrder())
-
-        interpreter.run(
-            bitmapToByteBuffer(resizeBitmap, IMAGE_SIZE, IMAGE_SIZE),
-            segmentationMasks
-        )
-
-        return Bitmap.createScaledBitmap(
-            convertBytebufferMaskToBitmap(segmentationMasks),
-            bitmap.width,
-            bitmap.height,
-            true
+        return maskImage(
+            original = bitmap,
+            mask = segmentedImage,
+            blurRadius = blurRadius,
+            toggle = toggle
         )
     }
 
-    private fun convertBytebufferMaskToBitmap(
+    fun setBgColor(color: Int) {
+        _bgColorTransform.value = color
+    }
+
+
+    private fun convertByteBufferMaskToBitmap(
         inputBuffer: ByteBuffer
     ): Bitmap {
 
         val maskBitmap = Bitmap.createBitmap(IMAGE_SIZE, IMAGE_SIZE, Bitmap.Config.ARGB_8888)
 
 
-        val t = Color.BLACK
         //지금 이게 가로세로 257 x 257 에 픽셀 돌릴려는 거 같아보임.
         // 나한태 필요한건 0 : 배경, 15 : 사람 이니까 다른거 다 없앰.
 
@@ -112,12 +90,11 @@ class TensoroidViewModel : ViewModel() {
 
                 // 사람이크면 흰색으로 그림.
                 if (personVal > backgroundVal) {
-                    if(toggle){
+                    if (toggle) {
                         maskBitmap.setPixel(x, y, Color.WHITE)
-                    }else{
+                    } else {
                         maskBitmap.setPixel(x, y, Color.TRANSPARENT)
                     }
-//                    maskBitmap.setPixel(x, y, Color.WHITE)
                 } else {
                     maskBitmap.setPixel(x, y, color)
                 }
@@ -126,20 +103,9 @@ class TensoroidViewModel : ViewModel() {
         return maskBitmap
     }
 
-    @Throws(IOException::class)
-    private fun loadModelFile(): MappedByteBuffer {
-        val fileDescriptor = App.instance.context().assets.openFd(Model_IMAGE_SEGMENTATION)
-        val inputStream = FileInputStream(fileDescriptor.fileDescriptor)
-        val fileChannel = inputStream.channel
-        val startOffset = fileDescriptor.startOffset
-        val declaredLength = fileDescriptor.declaredLength
-        val retFile = fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength)
-        fileDescriptor.close()
-        return retFile
-    }
 
     companion object {
-        private const val Model_IMAGE_SEGMENTATION = "deeplabv3_257_mv_gpu.tflite"
+//        private const val Model_IMAGE_SEGMENTATION = "deeplabv3_257_mv_gpu.tflite"
 
         const val NUM_CLASSES = 21
         const val IMAGE_SIZE = 257

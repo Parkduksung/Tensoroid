@@ -54,6 +54,7 @@
             android:id="@+id/slider"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:value="10f"
             android:valueFrom="0f"
             android:valueTo="25f"
             app:layout_constraintBottom_toBottomOf="parent"

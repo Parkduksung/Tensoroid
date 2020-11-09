@@ -6,41 +6,37 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.databinding.DataBindingUtil
 import com.example.tensoroid.R
+import com.example.tensoroid.databinding.ItemBottomSheetBinding
+import com.example.tensoroid.presenter.viewmodel.TensoroidViewModel
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import kotlinx.android.synthetic.main.item_bottom_sheet.*
+import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
 class BottomSheetDialog : BottomSheetDialogFragment(), View.OnClickListener {
 
-    interface SelectColorListener {
-        fun setColor(color: Int)
-    }
 
-    private lateinit var selectColorListener: SelectColorListener
+    private lateinit var binding: ItemBottomSheetBinding
 
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        (activity as? SelectColorListener)?.let {
-            selectColorListener = it
-        }
-    }
+    private val tensoroidViewModel by sharedViewModel<TensoroidViewModel>()
+
 
     override fun onClick(v: View?) {
         when (v?.id) {
             R.id.black -> {
-                selectColorListener.setColor(Color.BLACK)
+                tensoroidViewModel.setBgColor(Color.BLACK)
                 dismiss()
             }
             R.id.white -> {
-                selectColorListener.setColor(Color.WHITE)
+                tensoroidViewModel.setBgColor(Color.WHITE)
                 dismiss()
             }
             R.id.darker_gray -> {
-                selectColorListener.setColor(Color.DKGRAY)
+                tensoroidViewModel.setBgColor(Color.DKGRAY)
                 dismiss()
             }
             R.id.transparent -> {
-                selectColorListener.setColor(Color.TRANSPARENT)
+                tensoroidViewModel.setBgColor(Color.TRANSPARENT)
                 dismiss()
             }
         }
@@ -50,19 +46,19 @@ class BottomSheetDialog : BottomSheetDialogFragment(), View.OnClickListener {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? =
-        inflater.inflate(
-            R.layout.item_bottom_sheet,
-            container, false
-        )
+    ): View? {
+        binding = DataBindingUtil.inflate(inflater, R.layout.item_bottom_sheet, container, false)
+        binding.lifecycleOwner = this
+        return binding.root
+    }
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        black.setOnClickListener(this)
-        white.setOnClickListener(this)
-        darker_gray.setOnClickListener(this)
-        transparent.setOnClickListener(this)
+        binding.black.setOnClickListener(this)
+        binding.white.setOnClickListener(this)
+        binding.darkerGray.setOnClickListener(this)
+        binding.transparent.setOnClickListener(this)
     }
 
 
