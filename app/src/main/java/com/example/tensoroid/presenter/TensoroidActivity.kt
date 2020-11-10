@@ -13,7 +13,6 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
-import androidx.lifecycle.Observer
 import com.example.tensoroid.R
 import com.example.tensoroid.base.BaseActivity
 import com.example.tensoroid.databinding.ActivityMainBinding
@@ -30,14 +29,15 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
 
     private var blurNum: Float = 10.0f
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding.run {
             vm = movieViewModel
         }
+
         slider.isVisible = true
+
         if (allPermissionsGranted()) {
             startCamera()
         } else {
@@ -45,23 +45,23 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
                 this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
             )
         }
-        slider.addOnChangeListener { slider, value, _ ->
-            if (!movieViewModel.toggle)
-                slider.value = 0.0f
+//        slider.addOnChangeListener { slider, value, _ ->
+//            if (!movieViewModel.toggle)
+//                slider.value = 0.0f
+//
+//            if (value > 0.0f && value <= 25.0f)
+//                blurNum = value
+//        }
 
-            if (value > 0.0f && value <= 25.0f)
-                blurNum = value
-        }
-
-        movieViewModel.bgColorTransform.observe(this, Observer { color ->
+        movieViewModel.bgColorTransform.observe(this, { color ->
             movieViewModel.toggle = (color == Color.TRANSPARENT)
             slider.isVisible = (color == Color.TRANSPARENT)
             movieViewModel.color = color
         })
 
-
+//
         fb_capture.setOnClickListener {
-            BottomSheetDialog().show(supportFragmentManager, "BottomSheetDialog")
+            BackgroundChangeBottomSheetDialog().show(supportFragmentManager, "BottomSheetDialog")
         }
 
     }
@@ -86,7 +86,7 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
                     ImageAnalysis.Analyzer { image ->
                         runOnUiThread {
                             val start = System.currentTimeMillis()
-                            movieViewModel.inputSource(image.toBitmap(), blurNum)
+                            movieViewModel.inputSource(image.toBitmap())
                             Log.d("결과", (System.currentTimeMillis() - start).toString())
                             image.close()
                         }
@@ -130,6 +130,11 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
                 finish()
             }
         }
+    }
+
+
+    fun startBackgroundChangeBottomSheetDialog() {
+        BackgroundChangeBottomSheetDialog().show(supportFragmentManager, "BottomSheetDialog")
     }
 
 

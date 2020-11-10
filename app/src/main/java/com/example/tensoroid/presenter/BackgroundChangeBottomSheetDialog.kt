@@ -13,7 +13,7 @@ import com.example.tensoroid.presenter.viewmodel.TensoroidViewModel
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
-class BottomSheetDialog : BottomSheetDialogFragment(), View.OnClickListener {
+class BackgroundChangeBottomSheetDialog : BottomSheetDialogFragment(), View.OnClickListener {
 
 
     private lateinit var binding: ItemBottomSheetBinding

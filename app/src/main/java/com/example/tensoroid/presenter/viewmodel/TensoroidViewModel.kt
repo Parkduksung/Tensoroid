@@ -5,6 +5,7 @@ import android.graphics.Color
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.tensoroid.presenter.BackgroundChangeBottomSheetDialog
 import com.example.tensoroid.presenter.TensorFlow
 import com.example.tensoroid.util.ImageUtils.maskImage
 import java.nio.ByteBuffer
@@ -20,6 +21,7 @@ class TensoroidViewModel : ViewModel() {
     val bgColorTransform: LiveData<Int>
         get() = _bgColorTransform
 
+    val blurRadius1 = MutableLiveData(5f)
 
     private val tensorFlow by lazy { TensorFlow() }
 
@@ -27,14 +29,11 @@ class TensoroidViewModel : ViewModel() {
 
     private var isImageProcess = false
 
-    private var blurRadius = 0.1f
-
     var color = 0
 
     var toggle = true
 
-    fun inputSource(bitmap: Bitmap, blurRadius: Float) {
-        this.blurRadius = blurRadius
+    fun inputSource(bitmap: Bitmap) {
         if (!isImageProcess) {
             isImageProcess = true
             Thread {
@@ -56,7 +55,7 @@ class TensoroidViewModel : ViewModel() {
         return maskImage(
             original = bitmap,
             mask = segmentedImage,
-            blurRadius = blurRadius,
+            blurRadius = blurRadius1.value ?: 0f,
             toggle = toggle
         )
     }
@@ -71,7 +70,6 @@ class TensoroidViewModel : ViewModel() {
     ): Bitmap {
 
         val maskBitmap = Bitmap.createBitmap(IMAGE_SIZE, IMAGE_SIZE, Bitmap.Config.ARGB_8888)
-
 
         //지금 이게 가로세로 257 x 257 에 픽셀 돌릴려는 거 같아보임.
         // 나한태 필요한건 0 : 배경, 15 : 사람 이니까 다른거 다 없앰.

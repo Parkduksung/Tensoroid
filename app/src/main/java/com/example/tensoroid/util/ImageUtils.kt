@@ -62,9 +62,9 @@ object ImageUtils {
 
     fun maskImage(original: Bitmap, mask: Bitmap, blurRadius: Float, toggle: Boolean): Bitmap {
 
-
-        return if(toggle){
-            val result1 = Bitmap.createBitmap(original.width, original.height, Bitmap.Config.ARGB_8888)
+        return if (toggle && blurRadius != 0f) {
+            val result1 =
+                Bitmap.createBitmap(original.width, original.height, Bitmap.Config.ARGB_8888)
 
             val renderScript: RenderScript = RenderScript.create(App.instance.context())
             val blurInput: Allocation = Allocation.createFromBitmap(renderScript, original)
@@ -83,72 +83,33 @@ object ImageUtils {
             blurFast(result1, blurRadius.toInt())
 
 
-            val result = Bitmap.createBitmap(original.width, original.height, Bitmap.Config.ARGB_8888)
+            val result =
+                Bitmap.createBitmap(original.width, original.height, Bitmap.Config.ARGB_8888)
             val mCanvas = Canvas(result)
             val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-            //https://developer.android.com/reference/android/graphics/PorterDuff.Mode.html 참고.
             paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.MULTIPLY)
             mCanvas.drawBitmap(original, 0f, 0f, null)
             mCanvas.drawBitmap(mask, 0f, 0f, paint)
 
 
-            val result2 = Bitmap.createBitmap(original.width, original.height, Bitmap.Config.ARGB_8888)
+            val result2 =
+                Bitmap.createBitmap(original.width, original.height, Bitmap.Config.ARGB_8888)
             val mCanva1 = Canvas(result2)
-            //https://developer.android.com/reference/android/graphics/PorterDuff.Mode.html 참고.
             paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_ATOP)
             mCanva1.drawBitmap(result, 0f, 0f, null)
             mCanva1.drawBitmap(result1, 0f, 0f, paint)
 
             paint.xfermode = null
             result2
-        }else{
+        } else {
             val result =
                 Bitmap.createBitmap(original.width, original.height, Bitmap.Config.ARGB_8888)
             val mCanvas = Canvas(result)
             val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-            //https://developer.android.com/reference/android/graphics/PorterDuff.Mode.html 참고.
-//            paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.MULTIPLY)
             mCanvas.drawBitmap(original, 0f, 0f, null)
             mCanvas.drawBitmap(mask, 0f, 0f, paint)
             result
         }
-//        val result1 = Bitmap.createBitmap(original.width, original.height, Bitmap.Config.ARGB_8888)
-//
-//        val renderScript: RenderScript = RenderScript.create(App.instance.context())
-//        val blurInput: Allocation = Allocation.createFromBitmap(renderScript, original)
-//        val blurOutput: Allocation = Allocation.createFromBitmap(renderScript, mask)
-//        val blur: ScriptIntrinsicBlur = ScriptIntrinsicBlur.create(
-//            renderScript,
-//            Element.U8_4(renderScript)
-//        )
-//        blur.setInput(blurInput)
-//        blur.setRadius(blurRadius)
-//        blur.forEach(blurOutput)
-//        blurOutput.copyTo(result1)
-//
-//        renderScript.destroy()
-//
-//        blurFast(result1, blurRadius.toInt())
-//
-//
-//        val result = Bitmap.createBitmap(original.width, original.height, Bitmap.Config.ARGB_8888)
-//        val mCanvas = Canvas(result)
-//        val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-//        //https://developer.android.com/reference/android/graphics/PorterDuff.Mode.html 참고.
-//        paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.MULTIPLY)
-//        mCanvas.drawBitmap(original, 0f, 0f, null)
-//        mCanvas.drawBitmap(mask, 0f, 0f, paint)
-//
-//
-//        val result2 = Bitmap.createBitmap(original.width, original.height, Bitmap.Config.ARGB_8888)
-//        val mCanva1 = Canvas(result2)
-//        //https://developer.android.com/reference/android/graphics/PorterDuff.Mode.html 참고.
-//        paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_ATOP)
-//        mCanva1.drawBitmap(result, 0f, 0f, null)
-//        mCanva1.drawBitmap(result1, 0f, 0f, paint)
-//
-//        paint.xfermode = null
-//        return result2
     }
 
     private fun blurFast(bmp: Bitmap, radius: Int) {
