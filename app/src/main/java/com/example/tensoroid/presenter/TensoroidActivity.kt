@@ -5,7 +5,6 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
@@ -16,6 +15,7 @@ import androidx.core.view.isVisible
 import com.example.tensoroid.R
 import com.example.tensoroid.base.BaseActivity
 import com.example.tensoroid.databinding.ActivityMainBinding
+import com.example.tensoroid.ext.showToast
 import com.example.tensoroid.ext.toBitmap
 import com.example.tensoroid.presenter.viewmodel.TensoroidViewModel
 import kotlinx.android.synthetic.main.activity_main.*
@@ -25,7 +25,7 @@ import java.util.concurrent.Executors
 
 class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
 
-    private val movieViewModel by viewModel<TensoroidViewModel>()
+    private val tensoroidViewModel by viewModel<TensoroidViewModel>()
 
     private var blurNum: Float = 10.0f
 
@@ -33,7 +33,7 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
         super.onCreate(savedInstanceState)
 
         binding.run {
-            vm = movieViewModel
+            vm = tensoroidViewModel
         }
 
         slider.isVisible = true
@@ -45,21 +45,14 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
                 this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
             )
         }
-//        slider.addOnChangeListener { slider, value, _ ->
-//            if (!movieViewModel.toggle)
-//                slider.value = 0.0f
-//
-//            if (value > 0.0f && value <= 25.0f)
-//                blurNum = value
-//        }
 
-        movieViewModel.bgColorTransform.observe(this, { color ->
-            movieViewModel.toggle = (color == Color.TRANSPARENT)
+        tensoroidViewModel.bgColorTransform.observe(this, { color ->
+            Log.d("색상", color.toString())
+            tensoroidViewModel.toggle = (color == Color.TRANSPARENT)
             slider.isVisible = (color == Color.TRANSPARENT)
-            movieViewModel.color = color
+            tensoroidViewModel.color = color
         })
 
-//
         fb_capture.setOnClickListener {
             BackgroundChangeBottomSheetDialog().show(supportFragmentManager, "BottomSheetDialog")
         }
@@ -70,7 +63,7 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
 
         cameraProviderFuture.addListener(
-            Runnable {
+            {
                 val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
                 val cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
                 val preview = Preview.Builder()
@@ -83,10 +76,10 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
 
                 imageAnalysis.setAnalyzer(
                     Executors.newSingleThreadExecutor(),
-                    ImageAnalysis.Analyzer { image ->
+                    { image ->
                         runOnUiThread {
                             val start = System.currentTimeMillis()
-                            movieViewModel.inputSource(image.toBitmap())
+                            tensoroidViewModel.inputSource(image.toBitmap())
                             Log.d("결과", (System.currentTimeMillis() - start).toString())
                             image.close()
                         }
@@ -122,11 +115,7 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
             if (allPermissionsGranted()) {
                 startCamera()
             } else {
-                Toast.makeText(
-                    this,
-                    "Permissions not granted by the user.",
-                    Toast.LENGTH_SHORT
-                ).show()
+                showToast(getString(R.string.permission_fail))
                 finish()
             }
         }

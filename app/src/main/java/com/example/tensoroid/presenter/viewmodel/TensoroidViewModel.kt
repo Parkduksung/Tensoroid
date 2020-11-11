@@ -16,10 +16,10 @@ class TensoroidViewModel : ViewModel() {
     val bitmapTransform: LiveData<Bitmap>
         get() = _bitmapTransform
 
-
     private val _bgColorTransform = MutableLiveData<Int>()
     val bgColorTransform: LiveData<Int>
         get() = _bgColorTransform
+
 
     val blurRadius1 = MutableLiveData(5f)
 
@@ -65,6 +65,10 @@ class TensoroidViewModel : ViewModel() {
     }
 
 
+    fun setBgBlack(){
+        _bgColorTransform.value = Color.BLACK
+    }
+
     private fun convertByteBufferMaskToBitmap(
         inputBuffer: ByteBuffer
     ): Bitmap {
@@ -101,16 +105,14 @@ class TensoroidViewModel : ViewModel() {
         return maskBitmap
     }
 
-
     companion object {
-//        private const val Model_IMAGE_SEGMENTATION = "deeplabv3_257_mv_gpu.tflite"
-
         const val NUM_CLASSES = 21
         const val IMAGE_SIZE = 257
-
         const val NUM_PERSON = 15
         const val TO_FLOAT = 4
     }
+}
 
-
+enum class BgColor(color: Int) {
+    BG_BLACK(Color.BLACK)
 }

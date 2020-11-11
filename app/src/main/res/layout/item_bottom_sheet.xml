@@ -48,6 +48,7 @@
                     android:layout_height="50dp"
                     android:layout_marginStart="30dp"
                     android:backgroundTint="#000000"
+                    android:onClick="@{()->VM.setBgBlack()}"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
