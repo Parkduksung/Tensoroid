@@ -5,23 +5,11 @@ import android.graphics.Color
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.tensoroid.presenter.BackgroundChangeBottomSheetDialog
 import com.example.tensoroid.presenter.TensorFlow
 import com.example.tensoroid.util.ImageUtils.maskImage
 import java.nio.ByteBuffer
 
 class TensoroidViewModel : ViewModel() {
-
-    private val _bitmapTransform = MutableLiveData<Bitmap>()
-    val bitmapTransform: LiveData<Bitmap>
-        get() = _bitmapTransform
-
-    private val _bgColorTransform = MutableLiveData<Int>()
-    val bgColorTransform: LiveData<Int>
-        get() = _bgColorTransform
-
-
-    val blurRadius1 = MutableLiveData(5f)
 
     private val tensorFlow by lazy { TensorFlow() }
 
@@ -29,9 +17,17 @@ class TensoroidViewModel : ViewModel() {
 
     private var isImageProcess = false
 
-    var color = 0
+    val setBgColor: (color: Int) -> Unit = this::changeBgColor
 
-    var toggle = true
+    private val _bitmapTransform = MutableLiveData<Bitmap>()
+    val bitmapTransform: LiveData<Bitmap>
+        get() = _bitmapTransform
+
+    private val _bgColorTransform = MutableLiveData(Color.TRANSPARENT)
+    val bgColorTransform: LiveData<Int>
+        get() = _bgColorTransform
+
+    val blurRadius = MutableLiveData(DEFAULT_BLUR_RADIUS)
 
     fun inputSource(bitmap: Bitmap) {
         if (!isImageProcess) {
@@ -55,18 +51,13 @@ class TensoroidViewModel : ViewModel() {
         return maskImage(
             original = bitmap,
             mask = segmentedImage,
-            blurRadius = blurRadius1.value ?: 0f,
-            toggle = toggle
+            blurRadius = blurRadius.value ?: 0f,
+            toggle = bgColorTransform.value == Color.TRANSPARENT
         )
     }
 
-    fun setBgColor(color: Int) {
+    private fun changeBgColor(color: Int) {
         _bgColorTransform.value = color
-    }
-
-
-    fun setBgBlack(){
-        _bgColorTransform.value = Color.BLACK
     }
 
     private fun convertByteBufferMaskToBitmap(
@@ -74,6 +65,7 @@ class TensoroidViewModel : ViewModel() {
     ): Bitmap {
 
         val maskBitmap = Bitmap.createBitmap(IMAGE_SIZE, IMAGE_SIZE, Bitmap.Config.ARGB_8888)
+
 
         //지금 이게 가로세로 257 x 257 에 픽셀 돌릴려는 거 같아보임.
         // 나한태 필요한건 0 : 배경, 15 : 사람 이니까 다른거 다 없앰.
@@ -92,13 +84,13 @@ class TensoroidViewModel : ViewModel() {
 
                 // 사람이크면 흰색으로 그림.
                 if (personVal > backgroundVal) {
-                    if (toggle) {
+                    if (bgColorTransform.value == Color.TRANSPARENT) {
                         maskBitmap.setPixel(x, y, Color.WHITE)
                     } else {
                         maskBitmap.setPixel(x, y, Color.TRANSPARENT)
                     }
                 } else {
-                    maskBitmap.setPixel(x, y, color)
+                    maskBitmap.setPixel(x, y, bgColorTransform.value ?: Color.TRANSPARENT)
                 }
             }
         }
@@ -106,6 +98,9 @@ class TensoroidViewModel : ViewModel() {
     }
 
     companion object {
+
+        private const val DEFAULT_BLUR_RADIUS = 5f
+
         const val NUM_CLASSES = 21
         const val IMAGE_SIZE = 257
         const val NUM_PERSON = 15

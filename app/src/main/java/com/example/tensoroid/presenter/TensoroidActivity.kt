@@ -27,7 +27,7 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
 
     private val tensoroidViewModel by viewModel<TensoroidViewModel>()
 
-    private var blurNum: Float = 10.0f
+    private lateinit var backgroundChangeBottomSheetDialog: BackgroundChangeBottomSheetDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,8 +35,6 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
         binding.run {
             vm = tensoroidViewModel
         }
-
-        slider.isVisible = true
 
         if (allPermissionsGranted()) {
             startCamera()
@@ -47,16 +45,14 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
         }
 
         tensoroidViewModel.bgColorTransform.observe(this, { color ->
-            Log.d("색상", color.toString())
-            tensoroidViewModel.toggle = (color == Color.TRANSPARENT)
-            slider.isVisible = (color == Color.TRANSPARENT)
-            tensoroidViewModel.color = color
+            binding.slider.isVisible = (color == Color.TRANSPARENT)
+            if (::backgroundChangeBottomSheetDialog.isInitialized)
+                backgroundChangeBottomSheetDialog.dismiss()
         })
 
         fb_capture.setOnClickListener {
-            BackgroundChangeBottomSheetDialog().show(supportFragmentManager, "BottomSheetDialog")
+            startBackgroundChangeBottomSheetDialog()
         }
-
     }
 
     private fun startCamera() {
@@ -122,8 +118,13 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
     }
 
 
-    fun startBackgroundChangeBottomSheetDialog() {
-        BackgroundChangeBottomSheetDialog().show(supportFragmentManager, "BottomSheetDialog")
+    private fun startBackgroundChangeBottomSheetDialog() {
+        backgroundChangeBottomSheetDialog = BackgroundChangeBottomSheetDialog().apply {
+            show(
+                supportFragmentManager,
+                "BackgroundChangeBottomSheetDialog"
+            )
+        }
     }
 
 
