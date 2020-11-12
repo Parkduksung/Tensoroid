@@ -1,15 +1,24 @@
 package com.example.tensoroid.presenter.viewmodel
 
+import android.content.res.AssetFileDescriptor
 import android.graphics.Bitmap
 import android.graphics.Color
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.tensoroid.presenter.TensorFlow
+import com.example.tensor.Tensor
+import com.example.tensor.Tensor.Companion.IMAGE_SIZE
+import com.example.tensor.Tensor.Companion.NUM_CLASSES
+import com.example.tensor.Tensor.Companion.TO_FLOAT
+import com.example.tensoroid.App
 import com.example.tensoroid.util.ImageUtils.maskImage
+import java.io.FileInputStream
+import java.io.IOException
 import java.nio.ByteBuffer
+import java.nio.MappedByteBuffer
+import java.nio.channels.FileChannel
 
-class TensoroidViewModel(private val tensorFlow: TensorFlow) : ViewModel() {
+class TensoroidViewModel(private val tensor: Tensor) : ViewModel() {
 
     private var segmentedImage: Bitmap? = null
 
@@ -27,12 +36,29 @@ class TensoroidViewModel(private val tensorFlow: TensorFlow) : ViewModel() {
 
     val blurRadius = MutableLiveData(DEFAULT_BLUR_RADIUS)
 
+    init {
+        tensor.setInterpreter(loadModelFile())
+    }
+
+    @Throws(IOException::class)
+    private fun loadModelFile(): MappedByteBuffer {
+        val fileDescriptor =
+            App.instance.context().assets.openFd(Model_IMAGE_SEGMENTATION)
+        val inputStream = FileInputStream(fileDescriptor.fileDescriptor)
+        val fileChannel = inputStream.channel
+        val startOffset = fileDescriptor.startOffset
+        val declaredLength = fileDescriptor.declaredLength
+        val retFile = fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength)
+        fileDescriptor.close()
+        return retFile
+    }
+
     fun inputSource(bitmap: Bitmap) {
         if (!isImageProcess) {
             isImageProcess = true
             Thread {
                 segmentedImage = Bitmap.createScaledBitmap(
-                    convertByteBufferMaskToBitmap(tensorFlow.segmentImage(bitmap)),
+                    convertByteBufferMaskToBitmap(tensor.segmentImage(bitmap)),
                     bitmap.width,
                     bitmap.height,
                     true
@@ -62,7 +88,6 @@ class TensoroidViewModel(private val tensorFlow: TensorFlow) : ViewModel() {
     ): Bitmap {
 
         val maskBitmap = Bitmap.createBitmap(IMAGE_SIZE, IMAGE_SIZE, Bitmap.Config.ARGB_8888)
-
 
         //지금 이게 가로세로 257 x 257 에 픽셀 돌릴려는 거 같아보임.
         // 나한태 필요한건 0 : 배경, 15 : 사람 이니까 다른거 다 없앰.
@@ -96,11 +121,10 @@ class TensoroidViewModel(private val tensorFlow: TensorFlow) : ViewModel() {
 
     companion object {
 
+        private const val Model_IMAGE_SEGMENTATION = "deeplabv3_257_mv_gpu.tflite"
+
         private const val DEFAULT_BLUR_RADIUS = 5f
 
-        const val NUM_CLASSES = 21
-        const val IMAGE_SIZE = 257
         const val NUM_PERSON = 15
-        const val TO_FLOAT = 4
     }
 }
