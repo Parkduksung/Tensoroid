@@ -82,10 +82,8 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
                     })
 
                 try {
-                    // Unbind use cases before rebinding
                     cameraProvider.unbindAll()
 
-                    // Bind use cases to camera
                     cameraProvider.bindToLifecycle(
                         this, cameraSelector, imageAnalysis, preview
                     )

@@ -9,9 +9,7 @@ import com.example.tensoroid.presenter.TensorFlow
 import com.example.tensoroid.util.ImageUtils.maskImage
 import java.nio.ByteBuffer
 
-class TensoroidViewModel : ViewModel() {
-
-    private val tensorFlow by lazy { TensorFlow() }
+class TensoroidViewModel(private val tensorFlow: TensorFlow) : ViewModel() {
 
     private var segmentedImage: Bitmap? = null
 
@@ -41,7 +39,6 @@ class TensoroidViewModel : ViewModel() {
                 )
                 isImageProcess = false
             }.start()
-
         }
         _bitmapTransform.value = mergeBitmap(bitmap, segmentedImage)
     }
@@ -106,8 +103,4 @@ class TensoroidViewModel : ViewModel() {
         const val NUM_PERSON = 15
         const val TO_FLOAT = 4
     }
-}
-
-enum class BgColor(color: Int) {
-    BG_BLACK(Color.BLACK)
 }
