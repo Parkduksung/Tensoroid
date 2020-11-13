@@ -1,5 +1,6 @@
 package com.example.tensoroid.ext
 
+import androidx.core.view.isVisible
 import androidx.databinding.BindingAdapter
 import androidx.databinding.InverseBindingAdapter
 import androidx.databinding.InverseBindingListener
@@ -13,4 +14,9 @@ fun setSliderListeners(slider: Slider, attrChange: InverseBindingListener) {
     slider.addOnChangeListener { _, _, _ ->
         attrChange.onChange()
     }
+}
+
+@BindingAdapter("isVisible")
+fun Slider.isVisible(isVisible: Boolean) {
+    this.isVisible = isVisible
 }

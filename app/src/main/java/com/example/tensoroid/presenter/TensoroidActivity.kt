@@ -45,7 +45,6 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
         }
 
         tensoroidViewModel.bgColorTransform.observe(this, { color ->
-            binding.slider.isVisible = (color == Color.TRANSPARENT)
             if (::bgChangeDialog.isInitialized)
                 bgChangeDialog.dismiss()
         })

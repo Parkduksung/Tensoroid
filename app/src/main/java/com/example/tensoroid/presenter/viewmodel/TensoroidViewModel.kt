@@ -31,6 +31,9 @@ class TensoroidViewModel(private val tensorLib: TensorLib) : ViewModel() {
     val bgColorTransform: LiveData<Int>
         get() = _bgColorTransform
 
+    private val _isVisibleSlider = MutableLiveData(bgColorTransform.value == Color.TRANSPARENT)
+    val isVisibleSlider: LiveData<Boolean>
+        get() = _isVisibleSlider
 
     fun inputSource(bitmap: Bitmap) {
         if (!isImageProcess) {
@@ -60,6 +63,7 @@ class TensoroidViewModel(private val tensorLib: TensorLib) : ViewModel() {
 
     private fun changeBgColor(color: Int) {
         _bgColorTransform.value = color
+        _isVisibleSlider.value = (color == Color.TRANSPARENT)
     }
 
     private fun convertByteBufferMaskToBitmap(
