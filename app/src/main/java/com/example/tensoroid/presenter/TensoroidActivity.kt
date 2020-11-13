@@ -12,7 +12,6 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
-import com.example.tensor.Tensor
 import com.example.tensoroid.R
 import com.example.tensoroid.base.BaseActivity
 import com.example.tensoroid.databinding.ActivityMainBinding
