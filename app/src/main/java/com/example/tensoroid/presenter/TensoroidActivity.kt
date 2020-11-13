@@ -27,7 +27,7 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
 
     private val tensoroidViewModel by viewModel<TensoroidViewModel>()
 
-    private lateinit var backgroundChangeBottomSheetDialog: BackgroundChangeBottomSheetDialog
+    private lateinit var bgChangeDialog: BgChangeDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,8 +46,8 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
 
         tensoroidViewModel.bgColorTransform.observe(this, { color ->
             binding.slider.isVisible = (color == Color.TRANSPARENT)
-            if (::backgroundChangeBottomSheetDialog.isInitialized)
-                backgroundChangeBottomSheetDialog.dismiss()
+            if (::bgChangeDialog.isInitialized)
+                bgChangeDialog.dismiss()
         })
 
         fb_capture.setOnClickListener {
@@ -117,7 +117,7 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
 
 
     private fun startBackgroundChangeBottomSheetDialog() {
-        backgroundChangeBottomSheetDialog = BackgroundChangeBottomSheetDialog().apply {
+        bgChangeDialog = BgChangeDialog().apply {
             show(
                 supportFragmentManager,
                 "BackgroundChangeBottomSheetDialog"

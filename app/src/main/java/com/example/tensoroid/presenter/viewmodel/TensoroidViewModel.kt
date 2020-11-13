@@ -19,6 +19,8 @@ class TensoroidViewModel(private val tensorLib: TensorLib) : ViewModel() {
 
     private var isImageProcess = false
 
+    val blurRadius = MutableLiveData(DEFAULT_BLUR_RADIUS)
+
     val setBgColor: (color: Int) -> Unit = this::changeBgColor
 
     private val _bitmapTransform = MutableLiveData<Bitmap>()
@@ -28,8 +30,6 @@ class TensoroidViewModel(private val tensorLib: TensorLib) : ViewModel() {
     private val _bgColorTransform = MutableLiveData(Color.TRANSPARENT)
     val bgColorTransform: LiveData<Int>
         get() = _bgColorTransform
-
-    val blurRadius = MutableLiveData(DEFAULT_BLUR_RADIUS)
 
 
     fun inputSource(bitmap: Bitmap) {

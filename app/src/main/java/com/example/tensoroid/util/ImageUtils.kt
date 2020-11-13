@@ -1,69 +1,70 @@
 package com.example.tensoroid.util
 
 import android.graphics.*
-import android.media.Image
 import android.renderscript.Allocation
 import android.renderscript.Element
 import android.renderscript.RenderScript
 import android.renderscript.ScriptIntrinsicBlur
 import com.example.tensoroid.App
-import java.io.ByteArrayOutputStream
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
 
 
 object ImageUtils {
 
+    private val renderScript: RenderScript = RenderScript.create(App.instance.context())
+
+    private val blur: ScriptIntrinsicBlur = ScriptIntrinsicBlur.create(
+        renderScript,
+        Element.U8_4(renderScript)
+    )
+
+    private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+
+    private lateinit var mCanvas: Canvas
+
     fun maskImage(original: Bitmap, mask: Bitmap, blurRadius: Float, toggle: Boolean): Bitmap {
 
         return if (toggle && blurRadius != 0f) {
-            val result1 =
+            val onlyBlurBitmap =
                 Bitmap.createBitmap(original.width, original.height, Bitmap.Config.ARGB_8888)
 
-            val renderScript: RenderScript = RenderScript.create(App.instance.context())
             val blurInput: Allocation = Allocation.createFromBitmap(renderScript, original)
             val blurOutput: Allocation = Allocation.createFromBitmap(renderScript, mask)
-            val blur: ScriptIntrinsicBlur = ScriptIntrinsicBlur.create(
-                renderScript,
-                Element.U8_4(renderScript)
-            )
+
             blur.setInput(blurInput)
             blur.setRadius(blurRadius)
             blur.forEach(blurOutput)
-            blurOutput.copyTo(result1)
+            blurOutput.copyTo(onlyBlurBitmap)
 
             renderScript.destroy()
 
-            blurFast(result1, blurRadius.toInt())
+            blurFast(onlyBlurBitmap, blurRadius.toInt())
 
-            val result =
+            val onlyMaskBitmap =
                 Bitmap.createBitmap(original.width, original.height, Bitmap.Config.ARGB_8888)
-            val mCanvas = Canvas(result)
-            val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+            mCanvas = Canvas(onlyMaskBitmap)
             paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.MULTIPLY)
             mCanvas.drawBitmap(original, 0f, 0f, null)
             mCanvas.drawBitmap(mask, 0f, 0f, paint)
 
-
-            val result2 =
+            val maskBlurBitmap =
                 Bitmap.createBitmap(original.width, original.height, Bitmap.Config.ARGB_8888)
-            val mCanva1 = Canvas(result2)
+            mCanvas = Canvas(maskBlurBitmap)
             paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_ATOP)
-            mCanva1.drawBitmap(result, 0f, 0f, null)
-            mCanva1.drawBitmap(result1, 0f, 0f, paint)
+            mCanvas.drawBitmap(onlyMaskBitmap, 0f, 0f, null)
+            mCanvas.drawBitmap(onlyBlurBitmap, 0f, 0f, paint)
 
             paint.xfermode = null
-            result2
+            maskBlurBitmap
         } else {
-            val result =
+            val onlyMaskBitmap =
                 Bitmap.createBitmap(original.width, original.height, Bitmap.Config.ARGB_8888)
-            val mCanvas = Canvas(result)
-            val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+            mCanvas = Canvas(onlyMaskBitmap)
             mCanvas.drawBitmap(original, 0f, 0f, null)
             mCanvas.drawBitmap(mask, 0f, 0f, paint)
-            result
+            onlyMaskBitmap
         }
     }
+
 
     private fun blurFast(bmp: Bitmap, radius: Int) {
         val w = bmp.width
@@ -88,7 +89,7 @@ object ImageUtils {
                             (tl and 0xFF0000) + (tr and 0xFF0000) + (tc and 0xFF0000) + (bl and 0xFF0000) + (br and 0xFF0000) + (bc and 0xFF0000) + (cl and 0xFF0000) + (cr and 0xFF0000) shr 3 and 0xFF0000)
                 }
             }
-            r /= 2
+            r /= 4
         }
         bmp.setPixels(pix, 0, w, 0, 0, w, h)
     }

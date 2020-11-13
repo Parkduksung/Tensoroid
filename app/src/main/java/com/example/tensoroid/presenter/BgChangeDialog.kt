@@ -11,7 +11,7 @@ import com.example.tensoroid.presenter.viewmodel.TensoroidViewModel
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
-class BackgroundChangeBottomSheetDialog : BottomSheetDialogFragment() {
+class BgChangeDialog : BottomSheetDialogFragment() {
 
     private lateinit var binding: ItemBottomSheetBinding
 
