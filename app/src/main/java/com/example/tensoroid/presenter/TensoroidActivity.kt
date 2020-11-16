@@ -11,7 +11,9 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+
 import androidx.core.view.isVisible
+
 import com.example.tensoroid.R
 import com.example.tensoroid.base.BaseActivity
 import com.example.tensoroid.databinding.ActivityMainBinding
@@ -29,13 +31,14 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
 
     private lateinit var bgChangeDialog: BgChangeDialog
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
 
         binding.run {
             vm = tensoroidViewModel
         }
-
         if (allPermissionsGranted()) {
             startCamera()
         } else {
@@ -53,7 +56,7 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
             startBackgroundChangeBottomSheetDialog()
         }
     }
-
+  
     private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
 
