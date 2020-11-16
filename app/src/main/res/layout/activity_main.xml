@@ -27,7 +27,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias=".9"
-            app:srcCompat="@android:drawable/ic_menu_camera" />
+            app:srcCompat="@drawable/ic_color" />
 
 
         <androidx.camera.view.PreviewView
@@ -39,23 +39,30 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!--        <ImageView-->
-        <!--            android:id="@+id/iv_transform"-->
-        <!--            android:layout_width="0dp"-->
-        <!--            android:layout_height="0dp"-->
-        <!--            app:layout_constraintEnd_toEndOf="parent"-->
-        <!--            app:layout_constraintHeight_percent=".5"-->
-        <!--            app:layout_constraintStart_toStartOf="parent"-->
-        <!--            app:layout_constraintTop_toBottomOf="@id/viewFinder"-->
-        <!--            app:setBitmap="@{VM.bitmapTransform}" />-->
-
-        <android.opengl.GLSurfaceView
-            android:id="@+id/glsurface"
+        <ImageView
+            android:id="@+id/iv_transform"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:scaleType="fitXY"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHeight_percent=".5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/viewFinder" />
+            app:layout_constraintTop_toBottomOf="@id/viewFinder"
+            app:setBitmap="@{VM.bitmapTransform}" />
+
+        <com.google.android.material.slider.Slider
+            android:id="@+id/slider"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:value="@={VM.blurRadius}"
+            android:valueFrom=".01f"
+            android:valueTo="25f"
+            app:isVisible="@{VM.isVisibleSlider}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="1" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
