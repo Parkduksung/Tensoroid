@@ -2,6 +2,7 @@ package com.example.tensoroid
 
 import android.app.Application
 import android.content.Context
+import com.example.tensoroid.di.tensorModule
 import com.example.tensoroid.di.viewModelModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
@@ -21,7 +22,8 @@ class App : Application() {
             androidContext(this@App)
             modules(
                 listOf(
-                    viewModelModule
+                    viewModelModule,
+                    tensorModule
                 )
             )
         }

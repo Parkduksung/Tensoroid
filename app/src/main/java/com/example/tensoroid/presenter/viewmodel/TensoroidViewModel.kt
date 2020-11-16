@@ -1,80 +1,76 @@
 package com.example.tensoroid.presenter.viewmodel
 
 import android.graphics.Bitmap
-import android.graphics.Bitmap.createScaledBitmap
 import android.graphics.Color
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.tensoroid.App
-import com.example.tensoroid.util.ImageUtils.bitmapToByteBuffer
+import com.example.tensor.TensorLib
+import com.example.tensor.TensorLib.Companion.IMAGE_SIZE
+import com.example.tensor.TensorLib.Companion.NUM_CLASSES
+import com.example.tensor.TensorLib.Companion.NUM_PERSON
+import com.example.tensor.TensorLib.Companion.TO_FLOAT
 import com.example.tensoroid.util.ImageUtils.maskImage
-import org.tensorflow.lite.Interpreter
-import org.tensorflow.lite.gpu.GpuDelegate
-import java.io.FileInputStream
-import java.io.IOException
 import java.nio.ByteBuffer
-import java.nio.ByteOrder
-import java.nio.MappedByteBuffer
-import java.nio.channels.FileChannel
 
-class TensoroidViewModel : ViewModel() {
-
-    private val _bitmapTransform = MutableLiveData<Bitmap>()
-    val bitmapTransform
-        get() = _bitmapTransform
+class TensoroidViewModel(private val tensorLib: TensorLib) : ViewModel() {
 
 
-    private val interpreter by lazy {
-        Interpreter(
-            loadModelFile(),
-            Interpreter.Options().apply {
-                setNumThreads(4)
-                addDelegate(GpuDelegate())
-                setAllowBufferHandleOutput(false)
-            }
-        )
-    }
-
-    private var segmentedImageBitmap: Bitmap? = null
+    private var segmentedImage: Bitmap? = null
 
     private var isImageProcess = false
+
+
+    val blurRadius = MutableLiveData(DEFAULT_BLUR_RADIUS)
+
+
+    val setBgColor: (color: Int) -> Unit = this::changeBgColor
+
+
+    private val _bitmapTransform = MutableLiveData<Bitmap>()
+    val bitmapTransform: LiveData<Bitmap>
+        get() = _bitmapTransform
+
+    private val _bgColorTransform = MutableLiveData(Color.TRANSPARENT)
+    val bgColorTransform: LiveData<Int>
+        get() = _bgColorTransform
+
+    private val _isVisibleSlider = MutableLiveData(bgColorTransform.value == Color.TRANSPARENT)
+    val isVisibleSlider: LiveData<Boolean>
+        get() = _isVisibleSlider
 
     fun inputSource(bitmap: Bitmap) {
         if (!isImageProcess) {
             isImageProcess = true
             Thread {
-                segmentedImageBitmap = getSegmentImageBitmap(bitmap)
+                segmentedImage = Bitmap.createScaledBitmap(
+                    convertByteBufferMaskToBitmap(tensorLib.segmentImage(bitmap)),
+                    bitmap.width,
+                    bitmap.height,
+                    true
+                )
                 isImageProcess = false
             }.start()
         }
-        _bitmapTransform.value = mergeBitmap(bitmap, segmentedImageBitmap)
+        _bitmapTransform.value = mergeBitmap(bitmap, segmentedImage)
     }
 
-    private fun mergeBitmap(original: Bitmap, segmentedBitmap: Bitmap?): Bitmap {
-        if (segmentedBitmap == null) return original
-        return maskImage(original = original, mask = segmentedBitmap)
-    }
-
-    private fun getSegmentImageBitmap(bitmap: Bitmap): Bitmap {
-
-        val resizeBitmap =
-            createScaledBitmap(bitmap, IMAGE_SIZE, IMAGE_SIZE, true)
-
-        val segmentationMasks =
-            ByteBuffer.allocateDirect(IMAGE_SIZE * IMAGE_SIZE * NUM_CLASSES * TO_FLOAT)
-
-        segmentationMasks.order(ByteOrder.nativeOrder())
-
-        interpreter.run(
-            bitmapToByteBuffer(resizeBitmap, IMAGE_SIZE, IMAGE_SIZE),
-            segmentationMasks
+    private fun mergeBitmap(bitmap: Bitmap, segmentedImage: Bitmap?): Bitmap {
+        if (segmentedImage == null) return bitmap
+        return maskImage(
+            original = bitmap,
+            mask = segmentedImage,
+            blurRadius = blurRadius.value ?: 0f,
+            toggle = bgColorTransform.value == Color.TRANSPARENT
         )
-
-        return convertBytebufferMaskToBitmap(segmentationMasks)
     }
 
+    private fun changeBgColor(color: Int) {
+        _bgColorTransform.value = color
+        _isVisibleSlider.value = (color == Color.TRANSPARENT)
+    }
 
-    private fun convertBytebufferMaskToBitmap(
+    private fun convertByteBufferMaskToBitmap(
         inputBuffer: ByteBuffer
     ): Bitmap {
 
@@ -82,10 +78,8 @@ class TensoroidViewModel : ViewModel() {
 
         //지금 이게 가로세로 257 x 257 에 픽셀 돌릴려는 거 같아보임.
         // 나한태 필요한건 0 : 배경, 15 : 사람 이니까 다른거 다 없앰.
-
         for (y in 0 until IMAGE_SIZE) {
             for (x in 0 until IMAGE_SIZE) {
-
                 //c = 0 배경 , c = 15
                 // 배경
                 val backgroundVal = inputBuffer
@@ -97,36 +91,20 @@ class TensoroidViewModel : ViewModel() {
 
                 // 사람이크면 흰색으로 그림.
                 if (personVal > backgroundVal) {
-                    maskBitmap.setPixel(x, y, Color.TRANSPARENT)
+                    if (bgColorTransform.value == Color.TRANSPARENT) {
+                        maskBitmap.setPixel(x, y, Color.WHITE)
+                    } else {
+                        maskBitmap.setPixel(x, y, Color.TRANSPARENT)
+                    }
                 } else {
-                    maskBitmap.setPixel(x, y, Color.BLACK)
+                    maskBitmap.setPixel(x, y, bgColorTransform.value ?: Color.TRANSPARENT)
                 }
             }
         }
-        return maskBitmap
-    }
-
-    @Throws(IOException::class)
-    private fun loadModelFile(): MappedByteBuffer {
-        val fileDescriptor = App.instance.context().assets.openFd(Model_IMAGE_SEGMENTATION)
-        val inputStream = FileInputStream(fileDescriptor.fileDescriptor)
-        val fileChannel = inputStream.channel
-        val startOffset = fileDescriptor.startOffset
-        val declaredLength = fileDescriptor.declaredLength
-        val retFile = fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength)
-        fileDescriptor.close()
-        return retFile
+        return inputBuffer
     }
 
     companion object {
-        private const val Model_IMAGE_SEGMENTATION = "deeplabv3_257_mv_gpu.tflite"
-
-        const val NUM_CLASSES = 21
-        const val IMAGE_SIZE = 257
-
-        const val NUM_PERSON = 15
-        const val TO_FLOAT = 4
+        private const val DEFAULT_BLUR_RADIUS = 5f
     }
-
-
 }
