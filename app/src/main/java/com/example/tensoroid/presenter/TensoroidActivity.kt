@@ -2,6 +2,7 @@ package com.example.tensoroid.presenter
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import androidx.camera.core.CameraSelector
@@ -10,6 +11,7 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import com.example.tensoroid.R
 import com.example.tensoroid.base.BaseActivity
 import com.example.tensoroid.databinding.ActivityMainBinding
