@@ -20,9 +20,12 @@ class TensoroidViewModel(private val tensorLib: TensorLib) : ViewModel() {
 
     private var isImageProcess = false
 
+
     val blurRadius = MutableLiveData(DEFAULT_BLUR_RADIUS)
 
+
     val setBgColor: (color: Int) -> Unit = this::changeBgColor
+
 
     private val _bitmapTransform = MutableLiveData<Bitmap>()
     val bitmapTransform: LiveData<Bitmap>
@@ -70,6 +73,7 @@ class TensoroidViewModel(private val tensorLib: TensorLib) : ViewModel() {
     private fun convertByteBufferMaskToBitmap(
         inputBuffer: ByteBuffer
     ): Bitmap {
+
         val maskBitmap = Bitmap.createBitmap(IMAGE_SIZE, IMAGE_SIZE, Bitmap.Config.ARGB_8888)
 
         //지금 이게 가로세로 257 x 257 에 픽셀 돌릴려는 거 같아보임.

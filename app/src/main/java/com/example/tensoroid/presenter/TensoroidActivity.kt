@@ -2,11 +2,14 @@ package com.example.tensoroid.presenter
 
 import android.Manifest
 import android.content.pm.PackageManager
+
 import android.graphics.Color
+
 import android.os.Bundle
 import android.util.Log
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
@@ -31,7 +34,6 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
 
     private lateinit var bgChangeDialog: BgChangeDialog
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -46,6 +48,7 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
                 this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
             )
         }
+
 
         tensoroidViewModel.bgColorTransform.observe(this, { color ->
             if (::bgChangeDialog.isInitialized)
@@ -116,6 +119,7 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
             }
         }
     }
+
 
 
     private fun startBackgroundChangeBottomSheetDialog() {

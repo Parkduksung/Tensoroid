@@ -7,8 +7,6 @@ import android.renderscript.RenderScript
 import android.renderscript.ScriptIntrinsicBlur
 import com.example.tensoroid.App
 
-
-
 object ImageUtils {
 
     private val renderScript: RenderScript = RenderScript.create(App.instance.context())
