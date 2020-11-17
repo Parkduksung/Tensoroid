@@ -17,7 +17,7 @@ class TensoroidViewModel(private val tensorLib: TensorLib) : ViewModel() {
 
     private var segmentedImage: Bitmap? = null
 
-    private var isImageProcess = false
+    var isImageProcess = false
 
     val blurRadius = MutableLiveData(DEFAULT_BLUR_RADIUS)
 

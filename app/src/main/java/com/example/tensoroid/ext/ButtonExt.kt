@@ -14,10 +14,7 @@ fun Button.onChangeBg(colorType: BgColor, f: (color: Int) -> Unit) {
             BgColor.WHITE -> {
                 f(Color.WHITE)
             }
-            BgColor.DK_GRAY -> {
-                f(Color.DKGRAY)
-            }
-            BgColor.TRANSPARENT -> {
+            BgColor.Blur -> {
                 f(Color.TRANSPARENT)
             }
         }
@@ -25,5 +22,5 @@ fun Button.onChangeBg(colorType: BgColor, f: (color: Int) -> Unit) {
 }
 
 enum class BgColor {
-    BLACK, WHITE, DK_GRAY, TRANSPARENT
+    BLACK, WHITE, Blur
 }

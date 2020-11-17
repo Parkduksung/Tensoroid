@@ -24,13 +24,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="30dp"
-            android:text="Select Color"
+            android:text="Select Type"
             android:textSize="25sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
-
 
         <HorizontalScrollView
             android:id="@+id/horinz"
@@ -69,26 +68,16 @@
                     bind:colorType="@{BG.WHITE}"
                     bind:onChangeBg="@{VM.setBgColor}" />
 
-                <Button
-                    android:id="@+id/darker_gray"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:layout_marginStart="30dp"
-                    android:backgroundTint="@android:color/darker_gray"
-                    app:layout_constraintStart_toEndOf="@id/white"
-                    app:layout_constraintTop_toTopOf="parent"
-                    bind:colorType="@{BG.DK_GRAY}"
-                    bind:onChangeBg="@{VM.setBgColor}" />
 
                 <Button
                     android:id="@+id/transparent"
                     android:layout_width="50dp"
                     android:layout_height="50dp"
                     android:layout_marginStart="30dp"
-                    android:backgroundTint="@android:color/transparent"
-                    app:layout_constraintStart_toEndOf="@id/darker_gray"
+                    android:foreground="@drawable/blur"
+                    app:layout_constraintStart_toEndOf="@id/white"
                     app:layout_constraintTop_toTopOf="parent"
-                    bind:colorType="@{BG.TRANSPARENT}"
+                    bind:colorType="@{BG.Blur}"
                     bind:onChangeBg="@{VM.setBgColor}" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>

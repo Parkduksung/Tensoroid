@@ -29,12 +29,19 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
 
     private lateinit var bgChangeDialog: BgChangeDialog
 
+    lateinit var loadingDialog: LoadingDialog
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding.run {
             vm = tensoroidViewModel
         }
+
+        loadingDialog = LoadingDialog(this)
+        loadingDialog.showLoading()
+
+
 
         if (allPermissionsGranted()) {
             startCamera()
@@ -43,13 +50,15 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
                 this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
             )
         }
+        loadingDialog.dismissLoading()
 
         tensoroidViewModel.bgColorTransform.observe(this, { color ->
-            if (::bgChangeDialog.isInitialized)
+            if (::bgChangeDialog.isInitialized){
                 bgChangeDialog.dismiss()
+            }
         })
 
-        fb_capture.setOnClickListener {
+        fb_type.setOnClickListener {
             startBackgroundChangeBottomSheetDialog()
         }
     }
@@ -86,10 +95,8 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
                     cameraProvider.bindToLifecycle(
                         this, cameraSelector, imageAnalysis, preview
                     )
-
                 } catch (exc: Exception) {
                 }
-
             }, ContextCompat.getMainExecutor(this)
         )
     }
