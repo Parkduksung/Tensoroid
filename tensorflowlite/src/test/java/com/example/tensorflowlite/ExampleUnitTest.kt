@@ -1,4 +1,4 @@
-package com.example.tensorflow
+package com.example.tensorflowlite
 
 import org.junit.Test
 

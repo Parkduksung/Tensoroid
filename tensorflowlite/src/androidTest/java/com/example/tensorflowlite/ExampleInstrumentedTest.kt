@@ -1,4 +1,4 @@
-package com.example.tensorflow
+package com.example.tensorflowlite
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -19,6 +19,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.example.tensorflow.test", appContext.packageName)
+        assertEquals("com.example.tensorflowlite.test", appContext.packageName)
     }
 }

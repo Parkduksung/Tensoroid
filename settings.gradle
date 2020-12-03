@@ -1,2 +1,3 @@
+include ':tensorflowlite'
 include ':app'
 rootProject.name = "Tensoroid"
