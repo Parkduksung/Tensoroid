@@ -29,19 +29,16 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
 
     private lateinit var bgChangeDialog: BgChangeDialog
 
-    lateinit var loadingDialog: LoadingDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding.run {
             vm = tensoroidViewModel
+            fbType.setOnClickListener {
+                startBackgroundChangeBottomSheetDialog()
+            }
         }
-
-        loadingDialog = LoadingDialog(this)
-        loadingDialog.showLoading()
-
-
 
         if (allPermissionsGranted()) {
             startCamera()
@@ -50,17 +47,12 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
                 this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
             )
         }
-        loadingDialog.dismissLoading()
 
-        tensoroidViewModel.bgColorTransform.observe(this, { color ->
-            if (::bgChangeDialog.isInitialized){
+        tensoroidViewModel.bgColorTransform.observe(this, {
+            if (::bgChangeDialog.isInitialized) {
                 bgChangeDialog.dismiss()
             }
         })
-
-        fb_type.setOnClickListener {
-            startBackgroundChangeBottomSheetDialog()
-        }
     }
 
     private fun startCamera() {
@@ -82,9 +74,7 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
                     Executors.newSingleThreadExecutor(),
                     { image ->
                         runOnUiThread {
-                            val start = System.currentTimeMillis()
                             tensoroidViewModel.inputSource(image.toBitmap())
-                            Log.d("결과", (System.currentTimeMillis() - start).toString())
                             image.close()
                         }
                     })
@@ -121,7 +111,6 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
         }
     }
 
-
     private fun startBackgroundChangeBottomSheetDialog() {
         bgChangeDialog = BgChangeDialog().apply {
             show(
@@ -130,7 +119,6 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
             )
         }
     }
-
 
     companion object {
         private const val REQUEST_CODE_PERMISSIONS = 10

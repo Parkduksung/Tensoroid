@@ -1,4 +1,2 @@
-include ':tensorflow'
-include ':domain'
 include ':app'
 rootProject.name = "Tensoroid"
