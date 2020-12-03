@@ -33,7 +33,7 @@ class TensorFlowLite(private val context: Context) {
     }
 
 
-    fun segmentImage(bitmap: Bitmap): ByteBuffer {
+    fun segmentImage(bitmap: Bitmap): ByteBuffer? {
 
         segmentationMasks.rewind()
 

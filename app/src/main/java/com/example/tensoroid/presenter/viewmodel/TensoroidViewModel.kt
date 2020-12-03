@@ -5,15 +5,15 @@ import android.graphics.Color
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.tensorflowlite.TensorFlowLite
 import com.example.tensorflowlite.TensorFlowLite.Companion.IMAGE_SIZE
 import com.example.tensorflowlite.TensorFlowLite.Companion.NUM_CLASSES
 import com.example.tensorflowlite.TensorFlowLite.Companion.NUM_PERSON
 import com.example.tensorflowlite.TensorFlowLite.Companion.TO_FLOAT
+import com.example.tensoroid.domain.usecase.GetTensorFlowImage
 import com.example.tensoroid.util.ImageUtils.maskImage
 import java.nio.ByteBuffer
 
-class TensoroidViewModel(private val tensorLib: TensorFlowLite) : ViewModel() {
+class TensoroidViewModel(private val getTensorFlowImage: GetTensorFlowImage) : ViewModel() {
 
     private var segmentedImage: Bitmap? = null
 
@@ -40,7 +40,9 @@ class TensoroidViewModel(private val tensorLib: TensorFlowLite) : ViewModel() {
             isImageProcess = true
             Thread {
                 segmentedImage = Bitmap.createScaledBitmap(
-                    convertByteBufferMaskToBitmap(tensorLib.segmentImage(bitmap)),
+                    convertByteBufferMaskToBitmap(
+                        getTensorFlowImage.invoke(bitmap = bitmap).byteBuffer
+                    ),
                     bitmap.width,
                     bitmap.height,
                     true
