@@ -37,4 +37,6 @@ ext {
     recyclerview_version = '1.1.0'
     fragment_version = '1.2.4'
     camerax_version = "1.0.0-beta07"
+    activityVersion = "1.1.0"
+    fragmentVersion = '1.2.5'
 }

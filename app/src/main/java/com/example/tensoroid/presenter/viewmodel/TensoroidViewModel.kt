@@ -2,6 +2,7 @@ package com.example.tensoroid.presenter.viewmodel
 
 import android.graphics.Bitmap
 import android.graphics.Color
+import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -13,7 +14,8 @@ import com.example.tensoroid.domain.usecase.GetTensorFlowImage
 import com.example.tensoroid.util.ImageUtils.maskImage
 import java.nio.ByteBuffer
 
-class TensoroidViewModel(private val getTensorFlowImage: GetTensorFlowImage) : ViewModel() {
+class TensoroidViewModel @ViewModelInject constructor(private val getTensorFlowImage: GetTensorFlowImage) :
+    ViewModel() {
 
     private var segmentedImage: Bitmap? = null
 
