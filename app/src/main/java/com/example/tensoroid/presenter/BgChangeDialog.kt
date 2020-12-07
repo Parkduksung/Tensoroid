@@ -29,4 +29,8 @@ class BgChangeDialog : BottomSheetDialogFragment() {
         }
         return binding.root
     }
+
+    companion object{
+        const val TAG = "BackgroundChangeBottomSheetDialog"
+    }
 }

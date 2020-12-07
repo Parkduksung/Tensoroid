@@ -113,7 +113,7 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
         bgChangeDialog = BgChangeDialog().apply {
             show(
                 supportFragmentManager,
-                "BackgroundChangeBottomSheetDialog"
+                BgChangeDialog.TAG
             )
         }
     }

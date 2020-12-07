@@ -1,7 +1,9 @@
 package com.example.tensoroid.presenter.viewmodel
 
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Color
+import androidx.core.graphics.get
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -10,6 +12,8 @@ import com.example.tensorflowlite.TensorFlowLite.Companion.IMAGE_SIZE
 import com.example.tensorflowlite.TensorFlowLite.Companion.NUM_CLASSES
 import com.example.tensorflowlite.TensorFlowLite.Companion.NUM_PERSON
 import com.example.tensorflowlite.TensorFlowLite.Companion.TO_FLOAT
+import com.example.tensoroid.App
+import com.example.tensoroid.R
 import com.example.tensoroid.domain.usecase.GetTensorFlowImage
 import com.example.tensoroid.util.ImageUtils.maskImage
 import java.nio.ByteBuffer
@@ -20,6 +24,10 @@ class TensoroidViewModel @ViewModelInject constructor(private val getTensorFlowI
     private var segmentedImage: Bitmap? = null
 
     private var isImageProcess = false
+
+    val bitmap = BitmapFactory.decodeResource(App.instance.resources, R.drawable.background)
+
+    val toScaleBitmap = Bitmap.createScaledBitmap(bitmap, IMAGE_SIZE, IMAGE_SIZE, true)
 
     val blurRadius = MutableLiveData(DEFAULT_BLUR_RADIUS)
 
@@ -76,6 +84,7 @@ class TensoroidViewModel @ViewModelInject constructor(private val getTensorFlowI
 
         val maskBitmap = Bitmap.createBitmap(IMAGE_SIZE, IMAGE_SIZE, Bitmap.Config.ARGB_8888)
 
+
         //지금 이게 가로세로 257 x 257 에 픽셀 돌릴려는 거 같아보임.
         // 나한태 필요한건 0 : 배경, 15 : 사람 이니까 다른거 다 없앰.
 
@@ -99,7 +108,7 @@ class TensoroidViewModel @ViewModelInject constructor(private val getTensorFlowI
                         maskBitmap.setPixel(x, y, Color.TRANSPARENT)
                     }
                 } else {
-                    maskBitmap.setPixel(x, y, bgColorTransform.value ?: Color.TRANSPARENT)
+                    maskBitmap.setPixel(x, y, toScaleBitmap[x, y])
                 }
             }
         }
