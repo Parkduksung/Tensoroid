@@ -1,8 +1,12 @@
 package com.example.tensoroid.presenter
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.provider.MediaStore
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
@@ -48,9 +52,43 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
 
         tensoroidViewModel.bgColorTransform.observe(this, {
             if (::bgChangeDialog.isInitialized) {
-                bgChangeDialog.dismiss()
+                if(it == 1){
+                    goToAlbum()
+                    bgChangeDialog.dismiss()
+                }else{
+                    bgChangeDialog.dismiss()
+                }
             }
         })
+    }
+
+
+    private fun goToAlbum() {
+        val intent = Intent(Intent.ACTION_PICK)
+        intent.type = MediaStore.Images.Media.CONTENT_TYPE
+        startActivityForResult(intent, REQUEST_CODE_PERMISSIONS)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if(requestCode==REQUEST_CODE_PERMISSIONS && resultCode == RESULT_OK){
+
+            val url = data?.data
+
+            if(url != null){
+                try {
+                    val inputStream = contentResolver.openInputStream(url)
+                    val bitmap = BitmapFactory.decodeStream(inputStream)
+                    inputStream?.close()
+                    tensoroidViewModel.bitmap = bitmap
+                }catch (e : Exception) {
+                    throw Exception()
+                }
+            }
+
+        }else{
+            Toast.makeText(this, "onActivityResult_x", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun startCamera() {
@@ -120,6 +158,6 @@ class TensoroidActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_ma
 
     companion object {
         private const val REQUEST_CODE_PERMISSIONS = 10
-        private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
+        private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE)
     }
 }

@@ -17,10 +17,13 @@ fun Button.onChangeBg(colorType: BgColor, f: (color: Int) -> Unit) {
             BgColor.Blur -> {
                 f(Color.TRANSPARENT)
             }
+            BgColor.BACKGROUND -> {
+                f(1)
+            }
         }
     }
 }
 
 enum class BgColor {
-    BLACK, WHITE, Blur
+    BLACK, WHITE, Blur, BACKGROUND
 }

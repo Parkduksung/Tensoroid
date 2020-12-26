@@ -80,6 +80,17 @@
                     bind:colorType="@{BG.Blur}"
                     bind:onChangeBg="@{VM.setBgColor}" />
 
+                <Button
+                    android:id="@+id/background"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_marginStart="30dp"
+                    android:foreground="@drawable/blur"
+                    app:layout_constraintStart_toEndOf="@id/transparent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    bind:colorType="@{BG.BACKGROUND}"
+                    bind:onChangeBg="@{VM.setBgColor}" />
+
             </androidx.constraintlayout.widget.ConstraintLayout>
         </HorizontalScrollView>
 

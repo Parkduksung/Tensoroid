@@ -25,9 +25,10 @@ class TensoroidViewModel @ViewModelInject constructor(private val getTensorFlowI
 
     private var isImageProcess = false
 
-    val bitmap = BitmapFactory.decodeResource(App.instance.resources, R.drawable.background)
 
-    val toScaleBitmap = Bitmap.createScaledBitmap(bitmap, IMAGE_SIZE, IMAGE_SIZE, true)
+    var bitmap: Bitmap? = null
+
+//    val toScaleBitmap = Bitmap.createScaledBitmap(bitmap, IMAGE_SIZE, IMAGE_SIZE, true)
 
     val blurRadius = MutableLiveData(DEFAULT_BLUR_RADIUS)
 
@@ -84,34 +85,62 @@ class TensoroidViewModel @ViewModelInject constructor(private val getTensorFlowI
 
         val maskBitmap = Bitmap.createBitmap(IMAGE_SIZE, IMAGE_SIZE, Bitmap.Config.ARGB_8888)
 
+        if(_bgColorTransform.value == 1 && bitmap!=null) {
+            val toScaleBitmap = Bitmap.createScaledBitmap(bitmap!!, IMAGE_SIZE, IMAGE_SIZE, true)
+            for (y in 0 until IMAGE_SIZE) {
+                for (x in 0 until IMAGE_SIZE) {
+
+                    //c = 0 배경 , c = 15
+                    // 배경
+                    val backgroundVal = inputBuffer
+                        .getFloat((((y * IMAGE_SIZE) + x) * NUM_CLASSES) * TO_FLOAT)
+
+                    // 사람
+                    val personVal = inputBuffer
+                        .getFloat((((y * IMAGE_SIZE) + x) * NUM_CLASSES + NUM_PERSON) * TO_FLOAT)
+
+                    // 사람이크면 흰색으로 그림.
+                    if (personVal > backgroundVal) {
+                        if (bgColorTransform.value == Color.TRANSPARENT) {
+                            maskBitmap.setPixel(x, y, Color.WHITE)
+                        } else {
+                            maskBitmap.setPixel(x, y, Color.TRANSPARENT)
+                        }
+                    } else {
+                        maskBitmap.setPixel(x, y, toScaleBitmap[x, y])
+                    }
+                }
+            }
+        }else{
+            for (y in 0 until IMAGE_SIZE) {
+                for (x in 0 until IMAGE_SIZE) {
+
+                    //c = 0 배경 , c = 15
+                    // 배경
+                    val backgroundVal = inputBuffer
+                        .getFloat((((y * IMAGE_SIZE) + x) * NUM_CLASSES) * TO_FLOAT)
+
+                    // 사람
+                    val personVal = inputBuffer
+                        .getFloat((((y * IMAGE_SIZE) + x) * NUM_CLASSES + NUM_PERSON) * TO_FLOAT)
+
+                    // 사람이크면 흰색으로 그림.
+                    if (personVal > backgroundVal) {
+                        if (bgColorTransform.value == Color.TRANSPARENT) {
+                            maskBitmap.setPixel(x, y, Color.WHITE)
+                        } else {
+                            maskBitmap.setPixel(x, y, Color.TRANSPARENT)
+                        }
+                    } else {
+                        maskBitmap.setPixel(x, y, Color.TRANSPARENT)
+                    }
+                }
+            }
+        }
 
         //지금 이게 가로세로 257 x 257 에 픽셀 돌릴려는 거 같아보임.
         // 나한태 필요한건 0 : 배경, 15 : 사람 이니까 다른거 다 없앰.
 
-        for (y in 0 until IMAGE_SIZE) {
-            for (x in 0 until IMAGE_SIZE) {
-
-                //c = 0 배경 , c = 15
-                // 배경
-                val backgroundVal = inputBuffer
-                    .getFloat((((y * IMAGE_SIZE) + x) * NUM_CLASSES) * TO_FLOAT)
-
-                // 사람
-                val personVal = inputBuffer
-                    .getFloat((((y * IMAGE_SIZE) + x) * NUM_CLASSES + NUM_PERSON) * TO_FLOAT)
-
-                // 사람이크면 흰색으로 그림.
-                if (personVal > backgroundVal) {
-                    if (bgColorTransform.value == Color.TRANSPARENT) {
-                        maskBitmap.setPixel(x, y, Color.WHITE)
-                    } else {
-                        maskBitmap.setPixel(x, y, Color.TRANSPARENT)
-                    }
-                } else {
-                    maskBitmap.setPixel(x, y, toScaleBitmap[x, y])
-                }
-            }
-        }
         return maskBitmap
     }
 
